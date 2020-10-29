@@ -21,6 +21,7 @@
     "src/**/*",
     "config/**/*",
     ".umirc.ts",
-    "typings.d.ts"
+    "typings.d.ts",
+    "global.d.ts"
   ]
 }

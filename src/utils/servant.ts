@@ -1,45 +1,5 @@
 import { cachedProperty } from '@/decorators';
-
-interface Skill {
-  selfId:number,
-  name:string,
-  leave:number,
-  coolDown:number,
-  effect:(servant:ServantBase)=>void
-}
-
-type servantClass =
-  'saber'
-  | 'lancer'
-  | 'archer'
-  | 'rider'
-  | 'caster'
-  | 'assassin'
-  | 'ruler'
-  | 'moonCancer'
-  | 'avenger'
-  | 'berserker'
-  | 'shielder'
-  | 'foreigner'
-  | 'alterEgo'
-  | 'beast1'
-  | 'beast2'
-  | 'beast3'
-  | 'beast4'
-  | 'beast5'
-  | 'beast6'
-  | 'beast7'
-
-interface moveProcess {
-  id:symbol,
-  beforeAttack?:()=>number,
-  beforeDefence?:()=>number,
-  onAttack?:()=>void,
-  onDefence?:()=>void,
-  onAttackEnd?:()=>void,
-  onDefenceEnd?:()=>void,
-  test:(attacker:ServantBase,defender:ServantBase,card:MoveCard)=>boolean
-}
+import { classAttackPatch, hiddenCharacteristicRestraint, restraint } from '@/utils/base';
 
 abstract class Buff {
   abstract onEffect:(servant:ServantBase) => void;
@@ -51,7 +11,7 @@ abstract class Buff {
   abstract canRemove:boolean;
 }
 
-class MoveCard {
+export class MoveCard {
   color:'red' | 'green' | 'blue' | 'white';
   get basePowerRate(){
     switch (this.color){
@@ -95,7 +55,7 @@ class MoveCard {
 
 }
 
-class ExtraCard extends MoveCard {
+export class ExtraCard extends MoveCard {
   constructor (npRate:number, hits:Array<number>) {
     super('white', npRate, hits);
   }
@@ -107,8 +67,8 @@ class CommanderCard {
   }
 }
 
-abstract class ServantBase {
-  abstract servantClass:servantClass;
+export abstract class ServantBase {
+  abstract servantClass:ServantClass;
   abstract servantName:string;
   position:'friendly' | 'stranger' | 'enemy' | 'specialNull';
   baseMaxHp:number;
@@ -119,7 +79,7 @@ abstract class ServantBase {
   _atkBuff:Array<{powerUp:number,id:Symbol}>
 
   get atkBuff(){
-    let base:number = 0
+    let base:number = 1
     let attach:number = 0
     this._atkBuff.forEach(t=>{
       if (t.powerUp<1){
@@ -133,6 +93,7 @@ abstract class ServantBase {
       attach
     }
   }
+  criticPowerUp:number=0
 
   get maxHp () {
     return this.baseMaxHp + this.equipmentBaseHpUp + this.effectHpUp;
@@ -256,25 +217,66 @@ abstract class ServantBase {
     this._defence += value;
   }
 
-  attackEffect:Array<moveProcess> =[]
-  defenceEffect:Array<moveProcess> =[]
+  moveProcesses:Array<MoveProcess> =[]
   abstract CommanderCard:Array<CommanderCard>;
 
   abstract characteristic:Array<string>;
-  abstract hiddenCharacteristic:Array<string>;
+  abstract hiddenCharacteristic:hiddenCharacteristic;
+
+  specialAttack(target:ServantBase,moveCard:MoveCard):number{
+    let base = 0
+    this.moveProcesses.forEach(t=>{
+      if(t.onAttack&&t.test('attack',this,target,moveCard)){
+        base+=t.onAttack(this,target,moveCard)
+      }
+    })
+    return base
+  }
+  specialDefend(target:ServantBase,moveCard:MoveCard):number{
+    let base = 0
+    this.moveProcesses.forEach(t=>{
+      if(t.onDefence&&t.test('defend',this,target,moveCard)){
+        base+=t.onDefence(this,target,moveCard)
+      }
+    })
+    return base
+  }
 
   attackNormal(target:ServantBase,moveCard:MoveCard,position:1|2|3|4,redStart:number){
     // (ATK * 0.23 * ((指令卡伤害倍率 * (1 ± 指令卡性能BUFF ∓ 指令卡耐性)) + 首位加成) * 职阶补正 * 职阶克制 * 隐藏属性克制 * (1 ± 攻击力BUFF ∓ 防御力BUFF - 特防状态BUFF) * (1 + 暴击补正) * (1 + 特攻状态加成 ± 暴击威力BUFF * 暴击补正) * Extra攻击加成 * 指令卡Hit倍率 * 随机数) ± 伤害附加与减免 ∓ 被伤害减免与提升 + BusterChain加成
+    this.moveProcesses.forEach(t=>{
+      if(t.beforeAttack&&t.test('attack',this,target,moveCard)){
+        t.beforeAttack(this,target,moveCard)
+      }
+    })
     let baseAttack = this._atk
-    const damage = this._atk*0.23*(moveCard.basePowerRate*(0.8+0.2*position)*(1+moveCard.improvement-(()=>{
-      let buff:number = 0;
-      (target.defenceEffect.forEach(t=>{
-        if (t.beforeDefence&&t.test(this,target,moveCard)){
-          buff += t.beforeDefence()
-        }
-      }))
-      return buff
-    })())+redStart)
+    const damage =
+      this._atk*
+      0.23*
+      (
+        moveCard.basePowerRate*
+        (0.8+0.2*position)*
+        (1+moveCard.improvement-(()=>{
+          let buff:number = 0;
+          (target.moveProcesses.forEach(t=>{
+            if (t.beforeDefence&&t.test('defend',target,this,moveCard)){
+              buff += t.beforeDefence(target,this,moveCard)
+            }
+          }))
+          return buff
+        })())+redStart)*
+      classAttackPatch(this.servantClass)*
+      restraint(this.servantClass,target.servantClass)*
+      hiddenCharacteristicRestraint(this.hiddenCharacteristic,target.hiddenCharacteristic)*
+      (
+        1 + this.atkBuff.base - target.defence - this.specialDefend(target, moveCard)
+      )*
+      (
+        1+(Math.random()<=moveCard.criticRate?1:0)
+      )*
+      (
+
+      )
   }
 
   death () {
