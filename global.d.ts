@@ -31,14 +31,14 @@ declare global{
     | 'beast7'
   type hiddenCharacteristic = 'god'|'legend'|'human'|"star"
 
-  type scenes = 'attack'|'defend'|'death'|'roundStart'|'roundEnd'
+  type scenes = 'attack'|'defend'|'afterAttack'|'afterDefend'|'death'|'roundStart'|'roundEnd'
 
   interface MoveProcess {
     id:symbol,
     beforeAttack?:(attacker:ServantBase,defender?:ServantBase,moveCard?:MoveCard)=>number,//攻击前生效
     beforeDefence?:(defender:ServantBase,attacker?:ServantBase,moveCard?:MoveCard)=>number,//防御前生效
     onAttack?:(attacker:ServantBase,defender?:ServantBase,moveCard?:MoveCard)=>number,//攻击时生效，主要用于处理特攻
-    onDefence?:(defender:ServantBase,attacker?:ServantBase,moveCard?:MoveCard)=>number,//防御时生效，主要用于处理特防
+    onDefence?:(defender:ServantBase,attacker?:ServantBase,moveCard?:MoveCard)=>{base:number,attach:number},//防御时生效，主要用于处理特防 防御力，特防
     afterAttack?:(attacker:ServantBase,defender?:ServantBase,moveCard?:MoveCard)=>number,
     afterDefence?:(defender:ServantBase,attacker?:ServantBase,moveCard?:MoveCard)=>number,
     test:(scenes:scenes,attacker?:ServantBase,defender?:ServantBase,moveCard?:MoveCard)=>boolean
