@@ -1,4 +1,3 @@
-import { cachedProperty } from '@/decorators';
 import { classAttackPatch, hiddenCharacteristicRestraint, restraint } from '@/utils/base';
 
 abstract class Buff {
@@ -12,18 +11,18 @@ abstract class Buff {
 }
 
 export class MoveCard {
-  color:'red' | 'green' | 'blue' | 'white';
+  color:moveCardColor;
 
   get basePowerRate () {
     switch (this.color) {
-      case 'red':
+      case 'buster':
         return 1.5;
-      case 'green':
+      case 'quick':
         return 0.8;
-      case 'blue':
+      case 'art':
         return 1;
       default:
-        return 62.5;
+        return 0.625;
     }
   }
 
@@ -58,15 +57,16 @@ export class MoveCard {
     this._improvement = Math.min(Math.max(current, -100), 500);
   }
 
-  constructor (color:'red' | 'green' | 'blue' | 'white', npRate:number, hitsChain:Array<number>, fufuAttack:number = 0, baseCriticRate:number = 0, CommanderCardId?:number) {
-    this.color = color;
-    this.npRate = npRate;
-    this.fufuAttack = fufuAttack;
-    this.baseCriticRate = baseCriticRate;
-    this.hitsChain = hitsChain;
+  constructor (value:{ color:moveCardColor, npRate:number, hitsChain:Array<number>, fufuAttack?:number, CommanderCardId?:number }) {
+    this.color = value.color;
+    this.npRate = value.npRate;
+    this.hitsChain = value.hitsChain;
     this.criticDropRate = 0;// todo connect with class and color
-    if (CommanderCardId) {
-      this.commanderCard = new CommanderCard(CommanderCardId, this);
+    if (value.fufuAttack) {
+      this.fufuAttack = value.fufuAttack;
+    }
+    if (value.CommanderCardId) {
+      this.commanderCard = new CommanderCard(value.CommanderCardId, this);
     }
   }
 
@@ -74,9 +74,8 @@ export class MoveCard {
 
 export class ExtraCard extends MoveCard {
   constructor (npRate:number, hits:Array<number>) {
-    super('white', npRate, hits);
+    super({ color: 'extra', npRate: 0, hitsChain: [ 100 ] });
   }
-
 }
 
 class CommanderCard {
@@ -85,14 +84,17 @@ class CommanderCard {
 }
 
 export abstract class ServantBase {
-  protected constructor (props) {
-    this.position = props.position
-    this.baseMaxHp = props.baseMaxHp
+  protected constructor (props:{ baseMaxHp:number; atk:number; nobleLeave:number; }) {
+    this.baseMaxHp = props.baseMaxHp;
+    this._hp = props.baseMaxHp;
+    this._atk = props.atk;
+    this.nobleLeave = props.nobleLeave;
   }
 
   abstract servantClass:ServantClass;
   abstract servantName:string;
-  position:'friendly' | 'stranger' | 'enemy' | 'specialNull';
+  abstract hitNpRate:number;
+  position:'friendly' | 'stranger' | 'enemy' | 'specialNull' = 'friendly';
   baseMaxHp:number;
   effectHpUp:number = 0;
 
@@ -130,13 +132,12 @@ export abstract class ServantBase {
     const changedHp = this._hp + value;
     if (changedHp <= 0) {
       this._hp = 0;
-      this.death();
+      // this.death();
     } else {
       this._hp = Math.min(changedHp, this.maxHp);
     }
   }
 
-  @cachedProperty
   get npType ():'process' | 'block' | 'none' {
     if (this.position === 'friendly') {
       return 'process';
@@ -152,7 +153,6 @@ export abstract class ServantBase {
   specialNpBLocks?:number;
   nobleLeave:number;
 
-  @cachedProperty
   get maxNp () {
     if (this.npType === 'none') {
       return 0;
@@ -249,15 +249,15 @@ export abstract class ServantBase {
   }
 
   moveProcesses:Array<MoveProcess> = [];
-  abstract CommanderCard:Array<CommanderCard>;
+  abstract MoveCard:Array<MoveCard>;
 
-  abstract characteristic:Array<string>;
+  abstract characteristic:Set<characteristic>;
   abstract hiddenCharacteristic:hiddenCharacteristic;
 
   specialAttack (target:ServantBase, moveCard:MoveCard):number {
     let base = 0;
     this.moveProcesses.forEach(t => {
-      if (t.onAttack && t.test('attack', this, target, moveCard)) {
+      if (t.onAttack) {
         base += t.onAttack(this, target, moveCard);
       }
     });
@@ -265,12 +265,12 @@ export abstract class ServantBase {
   }
 
   specialDefend (attacker:ServantBase, moveCard:MoveCard) {
-    let base = { base:0,attach:0 };
+    let base = { base: 0, attach: 0 };
     this.moveProcesses.forEach(t => {
-      if (t.onDefence && t.test('defend', this, attacker, moveCard)) {
-        const temp = t.onDefence(this, attacker, moveCard)
-        base.base+=temp.base;
-        base.attach+=temp.attach
+      if (t.onDefence) {
+        const temp = t.onDefence(this, attacker, moveCard);
+        base.base += temp.base;
+        base.attach += temp.attach;
       }
     });
     return base;
@@ -279,60 +279,65 @@ export abstract class ServantBase {
   attackNormal (target:ServantBase, moveCard:MoveCard, position:0 | 1 | 2 | 3, redStart:number, ExtraCoefficient:3.5 | 2 | 1, busterChain:boolean = false) {
     // (ATK * 0.23 * ((指令卡伤害倍率 * (1 ± 指令卡性能BUFF ∓ 指令卡耐性)) + 首位加成) * 职阶补正 * 职阶克制 * 隐藏属性克制 * (1 ± 攻击力BUFF ∓ 防御力BUFF - 特防状态BUFF) * (1 + 暴击补正) * (1 + 特攻状态加成 ± 暴击威力BUFF * 暴击补正) * Extra攻击加成 * 指令卡Hit倍率 * 随机数) ± 伤害附加与减免 ∓ 被伤害减免与提升 + BusterChain加成
     this.moveProcesses.forEach(t => {
-      if (t.beforeAttack && t.test('attack', this, target, moveCard)) {
+      if (t.beforeAttack ) {
         t.beforeAttack(this, target, moveCard);
       }
     });
     target.moveProcesses.forEach(t => {
-      if (t.beforeDefence && t.test('defend', target, this, moveCard)) {
+      if (t.beforeDefence) {
         t.beforeDefence(target, this, moveCard);
       }
     });
     const defence = target.defencePowerUp;
-    const specialDefend = target.specialDefend(target, moveCard)
+    const specialDefend = target.specialDefend(target, moveCard);
     // let baseAttack = this._atk;
     const critic = (Math.random() <= moveCard.criticRate ? 1 : 0);
-    const damage =
-      this._atk *
-      0.23 *
-      (
-        moveCard.basePowerRate *
-        (1 + 0.2 * position) *
-        (1 + moveCard.improvement - specialDefend.attach + redStart) *
-        classAttackPatch(this.servantClass) *
-        restraint(this.servantClass, target.servantClass) *
-        hiddenCharacteristicRestraint(this.hiddenCharacteristic, target.hiddenCharacteristic) *
-        (
-          1 + this.atkPowerUp.base - defence.base - specialDefend.base
-        ) *
-        (
-          1 + critic
-        ) *
-        (
-          1 + this.specialAttack(target, moveCard) + (this.criticPowerUp + moveCard.criticPowerUp) * critic
-        ) *
-        (position === 3 ? 1 : 1) *
-        ExtraCoefficient *
-        moveCard.hitsRate *
-        (0.9 + Math.random() * 0.2)
-      ) +
-      this.atkPowerUp.attach -
-      target.defencePowerUp.attach +
-      (position === 3 ? 0 : busterChain ? this._atk * 0.2 : 0);
+    const damage = (
+      this._atk * 0.23 *
+      ((moveCard.basePowerRate * (1 + moveCard.improvement - specialDefend.attach)) + redStart) *
+      classAttackPatch(this.servantClass) *
+      restraint(this.servantClass, target.servantClass) *
+      hiddenCharacteristicRestraint(this.hiddenCharacteristic, target.hiddenCharacteristic) *
+      (1 + this.atkPowerUp.base - defence.base - specialDefend.base) *
+      (1 + critic) *
+      (1 + this.specialAttack(target, moveCard) + (this.criticPowerUp + moveCard.criticPowerUp) * critic) *
+      (position === 3 ? 1 : 1) *
+      moveCard.hitsRate / 100 *
+      (0.9 + Math.random() * 0.2)) +
+      this.atkPowerUp.attach - defence.attach + (position === 3 ? 0 : busterChain ? this._atk * 0.2 : 0);
     target.hp -= damage;
+    moveCard.hitsChain.forEach(t => {
+      console.log('damage: ' + damage * t / 100);
+    });
+    if (this.npType === 'process') {
+      // 每一hit的NP获得公式：
+// NP率 * (指令卡补正 * (1 ± 指令卡性能BUFF ∓ 指令卡耐性) + 首位加成) * 敌补正 * (1 ± NP获得量BUFF) * 暴击补正 * Overkill补正
+//
+//       每一hit的受击NP获得公式：
+// 受击NP率 * 敌补正 * (1 ± NP获得量BUFF) * (1 ± 受击NP获得量BUFF) * Overkill补正
+      this.np += 10;
+    }
+    if (target.npType === 'process') {
+      this.np += 10;
+    }
     this.moveProcesses.forEach(t => {
-      if (t.afterAttack && t.test('afterAttack', this, target, moveCard)) {
+      if (t.afterAttack) {
         t.afterAttack(this, target, moveCard);
       }
     });
     target.moveProcesses.forEach(t => {
-      if (t.afterDefence && t.test('afterDefend', target, this, moveCard)) {
+      if (t.afterDefence) {
         t.afterDefence(target, this, moveCard);
       }
     });
   }
 
-  death () {
-  }
+  // death () {
+  //   this.moveProcesses.forEach(t => {
+  //     if (t.death) {
+  //       t.death(this);
+  //     }
+  //   });
+  // }
 }
 

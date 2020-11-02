@@ -30,6 +30,7 @@ declare global{
     | 'beast6'
     | 'beast7'
   type hiddenCharacteristic = 'god'|'legend'|'human'|"star"
+  type moveCardColor = 'buster' | 'quick' | 'art' | 'extra'
 
   type scenes = 'attack'|'defend'|'afterAttack'|'afterDefend'|'death'|'roundStart'|'roundEnd'
 
@@ -41,8 +42,14 @@ declare global{
     onDefence?:(defender:ServantBase,attacker?:ServantBase,moveCard?:MoveCard)=>{base:number,attach:number},//防御时生效，主要用于处理特防 防御力，特防
     afterAttack?:(attacker:ServantBase,defender?:ServantBase,moveCard?:MoveCard)=>number,
     afterDefence?:(defender:ServantBase,attacker?:ServantBase,moveCard?:MoveCard)=>number,
-    test:(scenes:scenes,attacker?:ServantBase,defender?:ServantBase,moveCard?:MoveCard)=>boolean
+    death?:(friends:Array<ServantBase>,enemy:Array<ServantBase>)=>number,
+    roundStart?:(friends:Array<ServantBase>,enemy:Array<ServantBase>)=>number,
+    attackEnd?:(friends:Array<ServantBase>,enemy:Array<ServantBase>)=>number,
+    roundEnd?:(friends:Array<ServantBase>,enemy:Array<ServantBase>)=>number,
   }
+  type cardInit = {fufu:number,CommanderCardId?:number}
+
+  type characteristic = 'ride'|'dragon'|'altriaFace'|'godAndLegend'|'arthur'|'king'|'human'
 }
 
 
