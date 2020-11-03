@@ -1,5 +1,10 @@
 {
-  "private": true,
+  "name": "mini-fgo",
+  "license": "MIT",
+  "author": {
+    "name": "misakamaiyako",
+    "url": "https://github.com/misakamaiyako"
+  },
   "scripts": {
     "start": "umi dev",
     "build": "umi build",

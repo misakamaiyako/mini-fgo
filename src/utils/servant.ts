@@ -10,9 +10,18 @@ abstract class Buff {
   abstract canRemove:boolean;
 }
 
+/**
+ * @description 指令卡类
+ */
 export class MoveCard {
+  /**
+   * @description 颜色
+   */
   color:moveCardColor;
 
+  /**
+   * @description 攻击倍率
+   */
   get basePowerRate () {
     switch (this.color) {
       case 'buster':
@@ -26,17 +35,38 @@ export class MoveCard {
     }
   }
 
+  /**
+   * @description np率
+   */
   npRate:number;
+  /**
+   * @description 芙芙攻击
+   */
   fufuAttack:number = 0;
+  /**
+   * @description 集星率
+   */
   starRate:number = 0;
+  /**
+   * @description 暴击星掉落率
+   */
   criticDropRate:number;
+  /**
+   * @description 暴击几率，己方为星星数，地方为固定值
+   */
   criticRate:number = 0;
-  baseCriticRate:number = 0;
+  /**
+   * @description 单独行动卡的暴击威力提升
+   */
   criticPowerUp:number = 0;
+  /**
+   * @description 指令纹章
+   */
   commanderCard?:CommanderCard;
-  _improvement:number = 0;
 
-  // hits:Array<number>;
+  /**
+   * @description Hit倍率
+   */
   get hitsRate ():number {
     let total:number = 0;
     this.hitsChain.forEach(t => {
@@ -45,16 +75,26 @@ export class MoveCard {
     return total;
   }
 
-  state:'pool' | 'active' | 'used' = 'pool';
+  /**
+   * @description 四个状态分别对应 在指令卡池，当前回合被抽中， 被选择，被使用过
+   */
+  state:'pool' | 'active' |'selected' |'used' = 'pool';
+
+  /**
+   * @description 每一击伤害分布，基本总和为100，除天草extra和阿尔托莉雅（lancer）的蓝卡
+   */
   hitsChain:Array<number> = [ 100 ];
 
+  /**
+   * @description 色卡性能
+   */
+  _improvement:number = 0;
   get improvement () {
-    return this._improvement;
+    return Math.min(Math.max(this._improvement, -100), 500);
   }
 
   set improvement (value) {
-    let current = this._improvement + value;
-    this._improvement = Math.min(Math.max(current, -100), 500);
+    this._improvement = this._improvement + value
   }
 
   constructor (value:{ color:moveCardColor, npRate:number, hitsChain:Array<number>, fufuAttack?:number, CommanderCardId?:number }) {
@@ -72,17 +112,26 @@ export class MoveCard {
 
 }
 
+/**
+ * @description 额外指令卡
+ */
 export class ExtraCard extends MoveCard {
   constructor (npRate:number, hits:Array<number>) {
     super({ color: 'extra', npRate: 0, hitsChain: [ 100 ] });
   }
 }
 
+/**
+ * @description 指令纹章
+ */
 class CommanderCard {
   constructor (id:number, moveCard:MoveCard) {
   }
 }
 
+/**
+ * @description 从者基础设置
+ */
 export abstract class ServantBase {
   protected constructor (props:{ baseMaxHp:number; atk:number; nobleLeave:number; }) {
     this.baseMaxHp = props.baseMaxHp;
@@ -91,16 +140,53 @@ export abstract class ServantBase {
     this.nobleLeave = props.nobleLeave;
   }
 
+  /**
+   * @description 职阶
+   * @abstract
+   */
   abstract servantClass:ServantClass;
+
+  /**
+   * @description 从者真名
+   * @abstract
+   */
   abstract servantName:string;
+
+  /**
+   * @description 被击np率
+   * @abstract
+   */
   abstract hitNpRate:number;
+
+  /**
+   * @description 友方， 陌生人助战， 敌人，特别np槽，一般也是敌人
+   */
   position:'friendly' | 'stranger' | 'enemy' | 'specialNull' = 'friendly';
+
+  /**
+   * @description 基础最大hp 包括礼装给的
+   */
   baseMaxHp:number;
+
+  /**
+   * @description buff提升的最大hp
+   */
   effectHpUp:number = 0;
 
+  /**
+   * @description 基础攻击，包括礼装给的
+   */
   _atk:number;
+
+  /**
+   * @description 攻击力buff，包裹提升和降低
+   * @param powerUp 大于1时视为固定附加伤害，小于1视为百分比提升
+   */
   _atkPowerUp:Array<{ powerUp:number, id:Symbol }> = [];
 
+  /**
+   * @description 获取总计的伤害提升和伤害附加
+   */
   get atkPowerUp () {
     let base:number = 1;
     let attach:number = 0;
@@ -117,13 +203,27 @@ export abstract class ServantBase {
     };
   }
 
+  /**
+   * @description 获取暴击伤害，不计算只赋予某些行动卡的暴击伤害
+   */
   criticPowerUp:number = 1;
 
+  /**
+   * @description 获取总的最大生命值
+   */
   get maxHp () {
     return this.baseMaxHp + this.effectHpUp;
   }
 
+  /**
+   * @description 当前生命值
+   * @private
+   */
   _hp:number = 0;
+
+  /**
+   * @description 显示的生命值
+   */
   get hp ():number {
     return Math.floor(this._hp);
   }
