@@ -56,9 +56,25 @@ export class MoveCard {
    */
   criticRate:number = 0;
   /**
-   * @description 单独行动卡的暴击威力提升
+   * @description 单张行动卡的暴击威力提升
    */
   criticPowerUp:number = 0;
+
+  /**
+   * @description 星权
+   */
+  criticStarRate:number = 0;
+
+  /**
+   * @description 星权提升
+   */
+  criticStarRateUp:number = 0;
+
+  /**
+   * @description 随机星权
+   */
+  randomCriticStarRate:number = 0;
+
   /**
    * @description 指令纹章
    */
@@ -78,8 +94,12 @@ export class MoveCard {
   /**
    * @description 四个状态分别对应 在指令卡池，当前回合被抽中， 被选择，被使用过
    */
-  state:'pool' | 'active' |'selected' |'used' = 'pool';
+  state:'pool' | 'active' | 'selected' | 'used' = 'pool';
 
+  /**
+   * @description 是否有用，true或者异常状态描述
+   */
+  usable:true | string = true;
   /**
    * @description 每一击伤害分布，基本总和为100，除天草extra和阿尔托莉雅（lancer）的蓝卡
    */
@@ -94,7 +114,7 @@ export class MoveCard {
   }
 
   set improvement (value) {
-    this._improvement = this._improvement + value
+    this._improvement = this._improvement + value;
   }
 
   constructor (value:{ color:moveCardColor, npRate:number, hitsChain:Array<number>, fufuAttack?:number, CommanderCardId?:number }) {
@@ -159,9 +179,14 @@ export abstract class ServantBase {
   abstract hitNpRate:number;
 
   /**
+   * @description 即死率
+   */
+  abstract deathRate:number;
+
+  /**
    * @description 友方， 陌生人助战， 敌人，特别np槽，一般也是敌人
    */
-  position:'friendly' | 'stranger' | 'enemy' | 'specialNull' = 'friendly';
+  position:'friendly' | 'stranger' | 'enemy' | 'special' = 'friendly';
 
   /**
    * @description 基础最大hp 包括礼装给的
@@ -191,7 +216,7 @@ export abstract class ServantBase {
     let base:number = 1;
     let attach:number = 0;
     this._atkPowerUp.forEach(t => {
-      if (t.powerUp < 1) {
+      if (Math.abs(t.powerUp) < 1) {
         base += t.powerUp;
       } else {
         attach += t.powerUp;
@@ -238,6 +263,9 @@ export abstract class ServantBase {
     }
   }
 
+  /**
+   * @description 能量条类型
+   */
   get npType ():'process' | 'block' | 'none' {
     if (this.position === 'friendly') {
       return 'process';
@@ -250,9 +278,19 @@ export abstract class ServantBase {
     }
   }
 
+  /**
+   * @description 特殊敌人的能量槽计数
+   */
   specialNpBLocks?:number;
+
+  /**
+   * @description 宝具等级
+   */
   nobleLeave:number;
 
+  /**
+   * @description 能量最大值
+   */
   get maxNp () {
     if (this.npType === 'none') {
       return 0;
@@ -307,7 +345,14 @@ export abstract class ServantBase {
     return 0;
   }
 
+  /**
+   * @description 实际的能量值
+   */
   _np:number = 0;
+
+  /**
+   * @description 显示的能量值
+   */
   get np () {
     return this._np;
   }
@@ -329,13 +374,19 @@ export abstract class ServantBase {
     }
   }
 
+  /**
+   * @description 常驻防御buff，小于1视为百分比变化，大于1为伤害附加或减免，特防在moveProcess.onDefend时返回
+   */
   _defenceBuff:Array<{ powerUp:number, id:Symbol }> = [];
 
+  /**
+   * @description 总计的常驻防御变化
+   */
   get defencePowerUp () {
     let base:number = 1;
     let attach:number = 0;
     this._defenceBuff.forEach(t => {
-      if (t.powerUp < 1) {
+      if (Math.abs(t.powerUp) < 1) {
         base += t.powerUp;
       } else {
         attach += t.powerUp;
@@ -348,12 +399,31 @@ export abstract class ServantBase {
     };
   }
 
+  /**
+   * @description 实际buff影响
+   */
   moveProcesses:Array<MoveProcess> = [];
+  /**
+   * @description 指令卡
+   */
   abstract MoveCard:Array<MoveCard>;
 
+  /**
+   * @description 角色属性
+   */
   abstract characteristic:Set<characteristic>;
+
+  /**
+   * @description 角色隐藏属性
+   */
   abstract hiddenCharacteristic:hiddenCharacteristic;
 
+  /**
+   *
+   * @param target 被攻击的角色
+   * @param moveCard 行动卡
+   * @description 特攻计算
+   */
   specialAttack (target:ServantBase, moveCard:MoveCard):number {
     let base = 0;
     this.moveProcesses.forEach(t => {
@@ -364,6 +434,12 @@ export abstract class ServantBase {
     return base;
   }
 
+  /**
+   *
+   * @param attacker 攻击者
+   * @param moveCard 行动卡
+   * @description 特防计算，attach色卡耐性, base特防防御
+   */
   specialDefend (attacker:ServantBase, moveCard:MoveCard) {
     let base = { base: 0, attach: 0 };
     this.moveProcesses.forEach(t => {
@@ -376,10 +452,19 @@ export abstract class ServantBase {
     return base;
   }
 
+  /**
+   *
+   * @param target 被攻击的从者
+   * @param moveCard 行动卡
+   * @param position 卡位
+   * @param redStart 是否红卡开头
+   * @param ExtraCoefficient extra攻击加成
+   * @param busterChain 是不是三红
+   */
   attackNormal (target:ServantBase, moveCard:MoveCard, position:0 | 1 | 2 | 3, redStart:number, ExtraCoefficient:3.5 | 2 | 1, busterChain:boolean = false) {
     // (ATK * 0.23 * ((指令卡伤害倍率 * (1 ± 指令卡性能BUFF ∓ 指令卡耐性)) + 首位加成) * 职阶补正 * 职阶克制 * 隐藏属性克制 * (1 ± 攻击力BUFF ∓ 防御力BUFF - 特防状态BUFF) * (1 + 暴击补正) * (1 + 特攻状态加成 ± 暴击威力BUFF * 暴击补正) * Extra攻击加成 * 指令卡Hit倍率 * 随机数) ± 伤害附加与减免 ∓ 被伤害减免与提升 + BusterChain加成
     this.moveProcesses.forEach(t => {
-      if (t.beforeAttack ) {
+      if (t.beforeAttack) {
         t.beforeAttack(this, target, moveCard);
       }
     });
@@ -401,7 +486,7 @@ export abstract class ServantBase {
       (1 + this.atkPowerUp.base - defence.base - specialDefend.base) *
       (1 + critic) *
       (1 + this.specialAttack(target, moveCard) + (this.criticPowerUp + moveCard.criticPowerUp) * critic) *
-      (position === 3 ? 1 : 1) *
+      (position === 3 ? ExtraCoefficient : 1) *
       moveCard.hitsRate / 100 *
       (0.9 + Math.random() * 0.2)) +
       this.atkPowerUp.attach - defence.attach + (position === 3 ? 0 : busterChain ? this._atk * 0.2 : 0);

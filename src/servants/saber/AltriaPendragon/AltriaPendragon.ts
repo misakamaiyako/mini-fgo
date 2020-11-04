@@ -23,28 +23,37 @@ export class AltriaPendragonSaber extends ServantBase {
   servantClass:ServantClass = 'saber';
   servantName:string = '阿尔托莉雅·潘德拉贡';
   hitNpRate:number = 3;
+  deathRate= 0.21
 }
 
 export class AltriaPendragonSaberBusterCard extends MoveCard {
   constructor (fufu:number = 0, CommanderCardId?:number) {
     super({ color: 'buster', npRate: 0.86, hitsChain: [ 100 ], CommanderCardId, fufuAttack: fufu });
   }
+  criticStarRate = 102;
+  criticDropRate = 0.1;
 }
 
 export class AltriaPendragonSaberQuickCard extends MoveCard {
   constructor (fufu:number = 0, CommanderCardId?:number) {
     super({ color: 'quick', npRate: 0.86, hitsChain: [ 33, 67 ], CommanderCardId, fufuAttack: fufu });
   }
+  criticStarRate = 102;
+  criticDropRate = 0.1;
 }
 
 export class AltriaPendragonSaberArtCard extends MoveCard {
   constructor (fufu:number = 0, CommanderCardId?:number) {
     super({ color: 'art', npRate: 0.86, hitsChain: [ 33, 67 ], CommanderCardId, fufuAttack: fufu });
   }
+  criticStarRate = 102;
+  criticDropRate = 0.1;
 }
 
 export class AltriaPendragonSaberExtraCard extends MoveCard {
   constructor () {
     super({ color: 'extra', npRate: 0.86, hitsChain: [ 33, 67 ] });
   }
+  criticStarRate = 102;
+  criticDropRate = 0.1;
 }

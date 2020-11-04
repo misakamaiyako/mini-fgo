@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c68c4aec-acb5-4685-bc35-47f653d13e83" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/servent-go.iml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/servants/saber/AltriaPendragon/AltriaPendragon.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/servants/saber/AltriaPendragon/AltriaPendragon.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/utils/scenes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/scenes.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/utils/servant.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/servant.ts" afterDir="false" />
     </list>
@@ -96,7 +94,8 @@
       <workItem from="1604283516603" duration="5070000" />
       <workItem from="1604294550052" duration="17493000" />
       <workItem from="1604369927585" duration="759000" />
-      <workItem from="1604370827730" duration="5720000" />
+      <workItem from="1604370827730" duration="5781000" />
+      <workItem from="1604455916762" duration="12962000" />
     </task>
     <task id="LOCAL-00001" summary="project init">
       <created>1603883014777</created>
@@ -126,7 +125,14 @@
       <option name="project" value="LOCAL" />
       <updated>1604319087653</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="add: 添加场景&#10;add: 添加jsDoc">
+      <created>1604399948222</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1604399948222</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -149,6 +155,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="project init" />
     <MESSAGE value="wip" />
-    <option name="LAST_COMMIT_MESSAGE" value="wip" />
+    <MESSAGE value="add: 添加场景&#10;add: 添加jsDoc" />
+    <option name="LAST_COMMIT_MESSAGE" value="add: 添加场景&#10;add: 添加jsDoc" />
   </component>
 </project>
