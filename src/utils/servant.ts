@@ -52,7 +52,7 @@ export class MoveCard {
    */
   criticDropRate:number;
   /**
-   * @description 暴击几率，己方为星星数，地方为固定值
+   * @description 暴击几率，己方为星星数，敌方为固定值
    */
   criticRate:number = 0;
   /**
@@ -61,7 +61,7 @@ export class MoveCard {
   criticPowerUp:number = 0;
 
   /**
-   * @description 星权
+   * @description 星权 继承自从者
    */
   criticStarRate:number = 0;
 
@@ -74,6 +74,13 @@ export class MoveCard {
    * @description 随机星权
    */
   randomCriticStarRate:number = 0;
+
+  /**
+   * @description 实际当前回合星权
+   */
+  get actualCriticStarRate(){
+    return this.criticStarRate* (1+this.criticStarRateUp)+this.randomCriticStarRate
+  }
 
   /**
    * @description 指令纹章
@@ -204,10 +211,10 @@ export abstract class ServantBase {
   _atk:number;
 
   /**
-   * @description 攻击力buff，包裹提升和降低
+   * @description 攻击力buff，暴扣提升和降低
    * @param powerUp 大于1时视为固定附加伤害，小于1视为百分比提升
    */
-  _atkPowerUp:Array<{ powerUp:number, id:Symbol }> = [];
+  atkBuffChunk:Array<{ powerUp:number, id:Symbol }> = [];
 
   /**
    * @description 获取总计的伤害提升和伤害附加
@@ -215,7 +222,7 @@ export abstract class ServantBase {
   get atkPowerUp () {
     let base:number = 1;
     let attach:number = 0;
-    this._atkPowerUp.forEach(t => {
+    this.atkBuffChunk.forEach(t => {
       if (Math.abs(t.powerUp) < 1) {
         base += t.powerUp;
       } else {
@@ -476,7 +483,7 @@ export abstract class ServantBase {
     const defence = target.defencePowerUp;
     const specialDefend = target.specialDefend(target, moveCard);
     // let baseAttack = this._atk;
-    const critic = (Math.random() <= moveCard.criticRate ? 1 : 0);
+    const critic = (Math.random() <= (moveCard.criticRate/100) ? 1 : 0);
     const damage = (
       this._atk * 0.23 *
       ((moveCard.basePowerRate * (1 + moveCard.improvement - specialDefend.attach)) + redStart) *

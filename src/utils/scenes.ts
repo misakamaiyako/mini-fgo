@@ -29,16 +29,16 @@ export default abstract class Scenes {
 
   #critStar:number = 0;
 
-  get critStar(){
-    return this.#critStar
+  get critStar () {
+    return this.#critStar;
   }
 
-  set critStar(value){
-    this.#critStar+=value;
-    if (this.#critStar<0){
-      this.#critStar=0
+  set critStar (value) {
+    this.#critStar += value;
+    if (this.#critStar < 0) {
+      this.#critStar = 0;
     }
-    this.distributionCritStar()
+    this.distributionCritStar();
   }
 
   protected constructor (props:Array<ServantBase | null>) {
@@ -150,22 +150,54 @@ export default abstract class Scenes {
    * @description 分发暴击星
    * @param flag 是否需要重新分配随机星权
    */
-  distributionCritStar (flag=true) {
-    if (this.critStar===0){
-      if (flag){
+  distributionCritStar (flag = true) {
+    if (this.critStar === 0) {
+      if (flag) {
         let [ card1, card2, card3, card4, card5 ] = shuffle([ 50, 20, 20, 0, 0 ]);
-        this.availableMoveCard[0].randomCriticStarRate=card1;
-        this.availableMoveCard[1].randomCriticStarRate=card2;
-        this.availableMoveCard[2].randomCriticStarRate=card3;
-        this.availableMoveCard[3].randomCriticStarRate=card4;
-        this.availableMoveCard[4].randomCriticStarRate=card5;
+        this.availableMoveCard[ 0 ].randomCriticStarRate = card1;
+        this.availableMoveCard[ 1 ].randomCriticStarRate = card2;
+        this.availableMoveCard[ 2 ].randomCriticStarRate = card3;
+        this.availableMoveCard[ 3 ].randomCriticStarRate = card4;
+        this.availableMoveCard[ 4 ].randomCriticStarRate = card5;
       }
-      let card1Max:number=this.availableMoveCard[0].criticRate
-      let card2Max:number=0
-      let card3Max:number=0
-      let card4Max:number=0
-      let card5Max:number=0
+      let card1Max:number = this.availableMoveCard[ 0 ].actualCriticStarRate;
+      let card2Max:number = card1Max + this.availableMoveCard[ 1 ].actualCriticStarRate;
+      let card3Max:number = card2Max + this.availableMoveCard[ 2 ].actualCriticStarRate;
+      let card4Max:number = card3Max + this.availableMoveCard[ 3 ].actualCriticStarRate;
+      let card5Max:number = card4Max + this.availableMoveCard[ 4 ].actualCriticStarRate;
+      let critStar = Math.min(50, this.critStar);
+      while (critStar !== 0) {
+        const random = Math.random() * card5Max;
+        if (random < card1Max) {
+          critStar += this.tryAddStar(this.availableMoveCard[ 0 ]);
+        } else if (random < card2Max) {
+          critStar += this.tryAddStar(this.availableMoveCard[ 1 ]);
+        } else if (random < card3Max) {
+          critStar += this.tryAddStar(this.availableMoveCard[ 2 ]);
+        } else if (random < card4Max) {
+          critStar += this.tryAddStar(this.availableMoveCard[ 3 ]);
+        } else {
+          critStar += this.tryAddStar(this.availableMoveCard[ 4 ]);
+        }
+      }
     }
+  }
+
+  /**
+   *
+   * @description 尝试向一张指令卡发暴击星，成功返回-1，到达上限后返回0
+   */
+  tryAddStar (moveCard:MoveCard):0 | -1 {
+    if (moveCard.criticRate === 100) {
+      return 0;
+    } else {
+      moveCard.criticRate += 10;
+      return -1;
+    }
+  }
+
+  startAttack(moveCards:Array<MoveCard>){
+
   }
 }
 
