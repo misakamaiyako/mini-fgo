@@ -4,6 +4,11 @@ class Effect {
 
 }
 export abstract class SkillBase{
+  constructor (props: { cooldown: number; leave: number; }) {
+    this.cooldown=props.cooldown;
+    this.leave = props.leave
+  }
+
   /**
    * @description 场景，进入战斗之后才有
    */
@@ -34,6 +39,6 @@ export abstract class SkillBase{
 
 export class LeaderShip extends SkillBase{
   steps = [
-    ()=>leadership.bind(this,this.scenes as Scenes,()=>true,0.2)
+    ()=>leadership.bind(this,this.scenes as Scenes,()=>true,Symbol('leadership'),0.2)
   ];
 }

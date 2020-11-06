@@ -1,4 +1,6 @@
 import { classAttackPatch, hiddenCharacteristicRestraint, restraint } from '@/utils/base';
+import { SkillBase } from '@/utils/skillDatabase';
+import Scenes from '@/utils/scenes';
 
 abstract class Buff {
   abstract onEffect:(servant:ServantBase) => void;
@@ -78,8 +80,8 @@ export class MoveCard {
   /**
    * @description 实际当前回合星权
    */
-  get actualCriticStarRate(){
-    return this.criticStarRate* (1+this.criticStarRateUp)+this.randomCriticStarRate
+  get actualCriticStarRate () {
+    return this.criticStarRate * (1 + this.criticStarRateUp) + this.randomCriticStarRate;
   }
 
   /**
@@ -189,6 +191,11 @@ export abstract class ServantBase {
    * @description 即死率
    */
   abstract deathRate:number;
+
+  /**
+   * @description 技能组，未开放，已进化的技能设置为不可用,test检测技能是不是可用，比如吃星星
+   */
+  abstract skills:Array<{ usable:boolean, skill:SkillBase, test?:(...arg:any) => boolean }>;
 
   /**
    * @description 友方， 陌生人助战， 敌人，特别np槽，一般也是敌人
@@ -426,6 +433,11 @@ export abstract class ServantBase {
   abstract hiddenCharacteristic:hiddenCharacteristic;
 
   /**
+   * @description 场景
+   */
+  scenes?:Scenes;
+
+  /**
    *
    * @param target 被攻击的角色
    * @param moveCard 行动卡
@@ -483,7 +495,7 @@ export abstract class ServantBase {
     const defence = target.defencePowerUp;
     const specialDefend = target.specialDefend(target, moveCard);
     // let baseAttack = this._atk;
-    const critic = (Math.random() <= (moveCard.criticRate/100) ? 1 : 0);
+    const critic = (Math.random() <= (moveCard.criticRate / 100) ? 1 : 0);
     const damage = (
       this._atk * 0.23 *
       ((moveCard.basePowerRate * (1 + moveCard.improvement - specialDefend.attach)) + redStart) *
@@ -524,12 +536,27 @@ export abstract class ServantBase {
     });
   }
 
-  // death () {
-  //   this.moveProcesses.forEach(t => {
-  //     if (t.death) {
-  //       t.death(this);
-  //     }
-  //   });
-  // }
+  useSkill (operation:{ usable:boolean, skill:SkillBase, test?:(...arg:any) => boolean }) {
+    if (operation.usable) {
+      if (operation.test && operation.test(this.scenes, this)) {
+        const { skill } = operation;
+        if (skill.state === 'normal') {
+          if (skill.remainCooldown === 0) {
+            skill.scenes = this.scenes
+            skill.use();
+            skill.remainCooldown = skill.cooldown;
+          } else {
+            console.log('技能还没冷却好');
+          }
+        } else {
+          console.log('技能被封印');
+        }
+      } else {
+        console.log('技能不可用');
+      }
+    } else {
+      console.log('你竟然使用了一个不可用的技能(=ﾟДﾟ=)');
+    }
+  }
 }
 
