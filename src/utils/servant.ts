@@ -2,15 +2,7 @@ import { classAttackPatch, hiddenCharacteristicRestraint, restraint } from '@/ut
 import { SkillBase } from '@/utils/skillDatabase';
 import Scenes from '@/utils/scenes';
 
-abstract class Buff {
-  abstract onEffect:(servant:ServantBase) => void;
-  abstract onRemove:(servant:ServantBase) => void;
-  abstract name:string;
-  abstract text:string;
-  abstract describe:string;
-  abstract round:number;
-  abstract canRemove:boolean;
-}
+
 
 /**
  * @description 指令卡类
@@ -216,7 +208,10 @@ export abstract class ServantBase {
    * @description 基础攻击，包括礼装给的
    */
   _atk:number;
-
+  /**
+   * @description 给用户看的buff,技能或场地解除技能的时候，也从这里开始
+   */
+  buff:Array<Buff> =[]
   /**
    * @description 攻击力buff，暴扣提升和降低
    * @param powerUp 大于1时视为固定附加伤害，小于1视为百分比提升

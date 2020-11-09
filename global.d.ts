@@ -46,10 +46,18 @@ declare global{
     roundStart?:(friends:Array<ServantBase>,enemy:Array<ServantBase>)=>number,
     attackEnd?:(friends:Array<ServantBase>,enemy:Array<ServantBase>)=>number,
     roundEnd?:(friends:Array<ServantBase>,enemy:Array<ServantBase>)=>number,
+    timer?:number//计时器，如果一个效果有多个计时器的话，其它的计时器的效果设置为空
   }
   type cardInit = {fufu:number,CommanderCardId?:number}
 
   type characteristic = 'ride'|'dragon'|'altriaFace'|'godAndLegend'|'arthur'|'king'|'human'
+  interface Buff {
+    text:string,
+    affix?:string,
+    type:'attack'|'defend'|'other',//buff 类型，攻击强化，防御强化，其它
+    canRemove:boolean,
+    id:symbol
+  }
 }
 
 

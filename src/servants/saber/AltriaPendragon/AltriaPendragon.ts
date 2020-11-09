@@ -1,4 +1,5 @@
 import { MoveCard, ServantBase } from '@/utils/servant';
+import { SkillBase } from '@/utils/skillDatabase';
 
 export class AltriaPendragonSaber extends ServantBase {
   constructor (props:{ baseMaxHp:number; atk:number; nobleLeave:number; }, cards:cardInit[]) {
@@ -24,6 +25,7 @@ export class AltriaPendragonSaber extends ServantBase {
   servantName:string = '阿尔托莉雅·潘德拉贡';
   hitNpRate:number = 3;
   deathRate= 0.21
+  skills:Array<{ usable:boolean; skill:SkillBase; test?:(...arg:any) => boolean }> =[];
 }
 
 export class AltriaPendragonSaberBusterCard extends MoveCard {
