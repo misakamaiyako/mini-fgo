@@ -1,4 +1,4 @@
-import { MoveCard, ServantBase } from '@/utils/servant';
+import { MoveCard, ServantBase } from '@/base/servant';
 declare global{
   interface Skill {
     selfId:number,
@@ -56,7 +56,14 @@ declare global{
     affix?:string,
     type:'attack'|'defend'|'other',//buff 类型，攻击强化，防御强化，其它
     canRemove:boolean,
-    id:symbol
+    id:symbol,
+    remove:(removePower?:number)=>boolean
+  }
+  type EffectType = 'attack' | 'defence' | 'np' | 'weak'
+
+  interface Counter {
+    times?:number,
+    round?:number
   }
 }
 

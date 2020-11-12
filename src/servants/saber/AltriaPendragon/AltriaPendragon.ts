@@ -1,11 +1,11 @@
-import { MoveCard, ServantBase } from '@/utils/servant';
-import { SkillBase } from '@/utils/skillDatabase';
+import { MoveCard, ServantBase } from '@/base/servant';
+import { SkillBase } from '@/base/skillDatabase';
 
 export class AltriaPendragonSaber extends ServantBase {
   constructor (props:{ baseMaxHp:number; atk:number; nobleLeave:number; }, cards:cardInit[]) {
     super(props);
-    if (cards.length !== 5) {
-      throw new RangeError('every servant need five move card!');
+    if (cards.length !== 5 && cards.length !== 0) {
+      throw new RangeError('every servant need five or zero move cards!');
     } else {
       this.MoveCard = [
         new AltriaPendragonSaberQuickCard(cards[ 0 ].fufu, cards[ 0 ].CommanderCardId),
@@ -24,14 +24,15 @@ export class AltriaPendragonSaber extends ServantBase {
   servantClass:ServantClass = 'saber';
   servantName:string = '阿尔托莉雅·潘德拉贡';
   hitNpRate:number = 3;
-  deathRate= 0.21
-  skills:Array<{ usable:boolean; skill:SkillBase; test?:(...arg:any) => boolean }> =[];
+  deathRate = 0.21;
+  skills:Array<{ usable:boolean; skill:SkillBase; test?:(...arg:any) => boolean }> = [];
 }
 
 export class AltriaPendragonSaberBusterCard extends MoveCard {
   constructor (fufu:number = 0, CommanderCardId?:number) {
     super({ color: 'buster', npRate: 0.86, hitsChain: [ 100 ], CommanderCardId, fufuAttack: fufu });
   }
+
   criticStarRate = 102;
   criticDropRate = 0.1;
 }
@@ -40,6 +41,7 @@ export class AltriaPendragonSaberQuickCard extends MoveCard {
   constructor (fufu:number = 0, CommanderCardId?:number) {
     super({ color: 'quick', npRate: 0.86, hitsChain: [ 33, 67 ], CommanderCardId, fufuAttack: fufu });
   }
+
   criticStarRate = 102;
   criticDropRate = 0.1;
 }
@@ -48,6 +50,7 @@ export class AltriaPendragonSaberArtCard extends MoveCard {
   constructor (fufu:number = 0, CommanderCardId?:number) {
     super({ color: 'art', npRate: 0.86, hitsChain: [ 33, 67 ], CommanderCardId, fufuAttack: fufu });
   }
+
   criticStarRate = 102;
   criticDropRate = 0.1;
 }
@@ -56,6 +59,7 @@ export class AltriaPendragonSaberExtraCard extends MoveCard {
   constructor () {
     super({ color: 'extra', npRate: 0.86, hitsChain: [ 33, 67 ] });
   }
+
   criticStarRate = 102;
   criticDropRate = 0.1;
 }

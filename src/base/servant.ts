@@ -1,6 +1,6 @@
-import { classAttackPatch, hiddenCharacteristicRestraint, restraint } from '@/utils/base';
-import { SkillBase } from '@/utils/skillDatabase';
-import Scenes from '@/utils/scenes';
+import { classAttackPatch, hiddenCharacteristicRestraint, restraint } from '@/base/base';
+import { SkillBase } from '@/base/skillDatabase';
+import Scenes from '@/base/scenes';
 
 
 
@@ -154,6 +154,14 @@ class CommanderCard {
  * @description 从者基础设置
  */
 export abstract class ServantBase {
+  /**
+   * @description 对魔力
+   */
+  antiMagic:number = 0;
+  /**
+   * @description 接除状态耐性
+   */
+  resistance:number=0;
   protected constructor (props:{ baseMaxHp:number; atk:number; nobleLeave:number; }) {
     this.baseMaxHp = props.baseMaxHp;
     this._hp = props.baseMaxHp;
@@ -213,8 +221,8 @@ export abstract class ServantBase {
    */
   buff:Array<Buff> =[]
   /**
-   * @description 攻击力buff，暴扣提升和降低
-   * @param powerUp 大于1时视为固定附加伤害，小于1视为百分比提升
+   * @description 攻击力buff，包括提升和降低
+   * @param powerUp 大于2时视为固定附加伤害，小于等于2视为百分比提升
    */
   atkBuffChunk:Array<{ powerUp:number, id:Symbol }> = [];
 
@@ -225,7 +233,7 @@ export abstract class ServantBase {
     let base:number = 1;
     let attach:number = 0;
     this.atkBuffChunk.forEach(t => {
-      if (Math.abs(t.powerUp) < 1) {
+      if (Math.abs(t.powerUp) <= 2) {
         base += t.powerUp;
       } else {
         attach += t.powerUp;
@@ -532,14 +540,12 @@ export abstract class ServantBase {
   }
 
   useSkill (operation:{ usable:boolean, skill:SkillBase, test?:(...arg:any) => boolean }) {
-    if (operation.usable) {
+    if (operation.usable&&this.scenes) {
       if (operation.test && operation.test(this.scenes, this)) {
         const { skill } = operation;
         if (skill.state === 'normal') {
-          if (skill.remainCooldown === 0) {
-            skill.scenes = this.scenes
-            skill.use();
-            skill.remainCooldown = skill.cooldown;
+          if (skill.cd === 0) {
+            skill.use(this.scenes);
           } else {
             console.log('技能还没冷却好');
           }

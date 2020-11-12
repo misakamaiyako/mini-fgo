@@ -1,4 +1,4 @@
-import { MoveCard, ServantBase } from '@/utils/servant';
+import { MoveCard, ServantBase } from '@/base/servant';
 
 export default abstract class Scenes {
   standbyServant:Array<ServantBase | null>;
@@ -199,6 +199,11 @@ export default abstract class Scenes {
   startAttack(moveCards:Array<MoveCard>){
 
   }
+
+  /**
+   * @description 当前选择的对象
+   */
+  target?:ServantBase
 }
 
 function shuffle<T> (array:Array<T>):Array<T> {

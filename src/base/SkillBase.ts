@@ -1,5 +1,5 @@
-import Scenes from '@/utils/scenes';
-import { ServantBase } from '@/utils/servant';
+import Scenes from '@/base/scenes';
+import { ServantBase } from '@/base/servant';
 function attackUP(servant:ServantBase,promote:number,symbol:symbol,countdown:Array<MoveProcess>){
   servant.atkBuffChunk.push({powerUp:promote,id:symbol})
   servant.moveProcesses=servant.moveProcesses.concat(countdown)
@@ -44,11 +44,14 @@ export function busterUp (scenes:Scenes, test:(...arg0:any) => boolean, symbol:s
   if (self){
     let moveProcess:Array<MoveProcess> = [];
     let buff:Buff = {
-      affix: '剩余1回合', canRemove: true, id: symbol, text: 'busterUp', type: 'attack'
+      affix: '剩余1回合', canRemove: true, id: symbol, text: 'buster提升', type: 'attack'
     }
-    moveProcess.push({
-      id:symbol,
-
-    })
+    let m:MoveProcess = {
+      id: symbol,
+      timer: 3
+    }
+    m.roundEnd = normalRoundEnd.bind(m)(self,buff,symbol)
+    moveProcess.push(m)
+    self.buff.push(buff)
   }
 }
