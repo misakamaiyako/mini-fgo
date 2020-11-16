@@ -51,7 +51,7 @@ export default abstract class Scenes {
   }
 
   checkTeam (servants:Array<ServantBase | null>):boolean {
-    return Boolean(servants[ 0 ] && servants[ 1 ] && servants[ 1 ]);
+    return Boolean(servants[ 0 ] && servants[ 1 ] && servants[ 2 ]);
   }
 
   winOrLose () {
