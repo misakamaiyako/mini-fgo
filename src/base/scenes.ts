@@ -1,5 +1,5 @@
-import { MoveCard, ServantBase } from '@/base/servant';
-
+import {  ServantBase } from '@/base/servant';
+import MoveCard from '@/base/moveCard';
 export default abstract class Scenes {
   standbyServant:Array<ServantBase | null>;
   abstract standbyEnemy:Array<ServantBase>;
