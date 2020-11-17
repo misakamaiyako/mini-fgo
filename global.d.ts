@@ -1,4 +1,5 @@
-import { MoveCard, ServantBase } from '@/base/servant';
+import { ServantBase } from '@/base/servant';
+import MoveCard from '@/base/moveCard';
 
 declare global {
   interface Skill {
@@ -31,7 +32,7 @@ declare global {
     | 'beast6'
     | 'beast7'
   type hiddenCharacteristic = 'god' | 'legend' | 'human' | 'star'
-  type moveCardColor = 'buster' | 'quick' | 'art' | 'extra'
+  // type moveCardColor = 'buster' | 'quick' | 'art' | 'extra'
 
   type scenes = 'attack' | 'defend' | 'afterAttack' | 'afterDefend' | 'death' | 'roundStart' | 'roundEnd'
 
@@ -58,16 +59,15 @@ declare global {
     id:Symbol,
     buffType:BuffType,
     buffEffect:BuffEffect,
-    test:(...args:any) => boolean,
     timer:{
       times:number,
       round:number
     },
-    value:number,
     description:() => string,
     shouldRemove:boolean,
     remove:(removePower:number) => boolean,
-    chance:number//赋予成功的几率，大部分为情况1
+    activeRate:number,//buff有效的几率，大部分为情况1
+    handle:(value:{ actionType:ActionType, [ args:string ]:any }) => boolean//对象处理，必须在开始前判断类型,返回值表示是否对操作生效了
   }
 
   enum BuffType {
@@ -164,13 +164,33 @@ declare global {
     weaken,//弱化
     heal,//治疗
     charge,//充能
+    attackerBonusNp,//攻击者np
+    defenderBonusNp,//防御者np
     attack,//攻击
+    afterAttack,//攻击
     noble,//宝具
     defence,//防御
+    afterDefence,//防御
     roundEnd,//回合结束
     death,//角色战败
     defeated,//玩家战败
     defeat,//玩家胜利
+  }
+  enum StrengthenType {
+    attack,
+    defence
+  }
+  enum CardType {
+    buster,
+    art,
+    quick,
+    extra
+  }
+
+  enum NobleType {
+    allTarget,
+    single,
+    support
   }
 }
 
