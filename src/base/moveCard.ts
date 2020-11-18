@@ -3,11 +3,11 @@ import { ServantBase } from '@/base/servant';
 /**
  * @description 指令卡类
  */
-export default abstract class MoveCard {
+export default class MoveCard {
   /**
    * @description 颜色
    */
-  abstract cardType:CardType;
+  cardType:CardType;
 
   /**
    * @description 攻击倍率
@@ -28,7 +28,7 @@ export default abstract class MoveCard {
   /**
    * @description np率
    */
-  abstract npRate:number;
+  npRate:number;
   /**
    * @description 芙芙攻击
    */
@@ -93,16 +93,17 @@ export default abstract class MoveCard {
   /**
    * @description 每一击伤害分布，基本总和为100，除天草extra和阿尔托莉雅（lancer）的蓝卡
    */
-  abstract hitsChain:Array<number> ;
+  hitsChain:Array<number> ;
   owner:ServantBase;
 
-  protected constructor (value:{ fufuAttack?:number, CommanderCardId?:number,owner:ServantBase }) {
-    this.owner = value.owner
-    if (value.fufuAttack) {
-      this.fufuAttack = value.fufuAttack;
-    }
-    if (value.CommanderCardId) {
-      this.commanderCard = new CommanderCard(value.CommanderCardId, this);
+  constructor (cardType:CardType,npRate:number,hitsChain:Array<number>,owner:ServantBase, fufuAttack:number=0, CommanderCardId?:number) {
+    this.cardType = cardType;
+    this.npRate = npRate;
+    this.hitsChain = hitsChain;
+    this.owner = owner
+    this.fufuAttack = fufuAttack;
+    if (CommanderCardId) {
+      this.commanderCard = new CommanderCard(CommanderCardId, this);
     }
   }
 

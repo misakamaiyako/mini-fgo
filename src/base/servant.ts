@@ -51,9 +51,8 @@ export abstract class ServantBase {
   /**
    * @description 血量
    */
-  baseHp:number = 0;
+  abstract baseHp:number;
   strengthenHp:number = 0;//fufu
-  HpRecoverCoefficient:number = 1;
   suitHp:number = 0;
   HpBuff:Array<DirectlyEffectiveBuff> = [];
 
@@ -67,7 +66,6 @@ export abstract class ServantBase {
     })(this.HpBuff);
   }
 
-  HpRecoverOnRoundEnd:Array<DirectlyEffectiveBuff> = [];
   #hp:number = 0;
   get hp () {
     return Math.ceil(this.#hp);
@@ -77,7 +75,7 @@ export abstract class ServantBase {
     this.#hp = value;
   }
 
-  hpAdd (value:number):number {
+  hpAdd (value:number, damageEnd:boolean = true):number {
     if (value > 0) {
       let reference = { actionType: ActionType.heal, value: value };
       this.buffStack.handle(reference);
@@ -86,10 +84,27 @@ export abstract class ServantBase {
       this.#hp -= value;
       if (this.hp <= 0) {
         this.#hp = 0;
-        this.death();
+        if (damageEnd) {
+          this.death();
+        }
       }
     }
     return this.hp;
+  }
+
+  //受击np率
+  abstract npRate:number;
+  #np:number = 0;
+
+  get np () {
+    return this.#np|0;
+  }
+
+  set np (value) {
+    this.#np = Math.max(0, Math.min((this.#np + value), this.maxNp));
+    if (this.#np > 99 && this.#np < 100) {
+      this.#np = 100;
+    }
   }
 
   /**
@@ -98,9 +113,11 @@ export abstract class ServantBase {
   baseAttack:number = 0;
   strengthenAttack:number = 0;//fufu
   suitAttack:number = 0;
-  get atk(){
-    return this.baseAttack+this.strengthenAttack+this.suitAttack
+
+  get atk () {
+    return this.baseAttack + this.strengthenAttack + this.suitAttack;
   }
+
   /**
    * @description 职阶
    */
@@ -178,7 +195,7 @@ export abstract class ServantBase {
   /**
    * @description 宝具
    */
-  noble:Noble | undefined;
+  abstract noble:Noble;
   /**
    * @description 指令卡
    */

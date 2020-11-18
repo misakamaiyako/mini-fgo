@@ -8,7 +8,7 @@ class EXcalibar extends Noble {
   valueArray = [ [ 4, 5, 5.5, 5.75, 6 ], [ 0.2, 0.275, .35, .425, 0.5 ] ];
   actions = [
     moveCardPerformance([ {
-      color: 'buster',
+      color: CardType.buster,
       activeRate: 1,
       buffType: BuffType.strengthen,
       times: Infinity,

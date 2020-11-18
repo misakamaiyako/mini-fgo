@@ -186,11 +186,16 @@ declare global {
     quick,
     extra
   }
-
   enum NobleType {
     allTarget,
     single,
     support
+  }
+  enum ChainType{
+    buster,
+    quick,
+    art,
+    none
   }
 }
 

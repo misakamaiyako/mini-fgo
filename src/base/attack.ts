@@ -56,14 +56,30 @@ export interface NobleAttack extends NormalAttack{
 }
 
 export interface AttackerNp {
-  //NP率 * (指令卡补正 * (1 ± 指令卡性能BUFF ∓ 指令卡耐性) + 首位加成) * 敌补正 * (1 ± NP获得量BUFF) * 暴击补正 * Overkill补正
+  //NP率
   npRate:number,
+  //指令卡补正
   moveCaredBonus:number,
+  //指令卡性能BUFF
   moveCardPerformance:number,
+  //指令卡耐性
   moveCardEndurance:number,
+  //首位加成
   firstBonus:number,
+  //敌补正
   targetBonus:number,
+  //NP获得量BUFF
   NpBonus:number,
-  isCritic:1|2,
+  //暴击补正
+  isCritic:number,
+  //Overkill补正
+  overKillBonus:number
+}
+//受击NP率 * 敌补正 * (1 ± NP获得量BUFF) * (1 ± 受击NP获得量BUFF) * Overkill补正
+export interface DefenderNp {
+  defenceNpRate:number,
+  attackerNpBonus:number,
+  npBuff:number,
+  defenceNpBonus:number,
   overKillBonus:number
 }
