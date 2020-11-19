@@ -10,41 +10,52 @@ import {
   hiddenCharacteristicRestraint,
   moveCardStarDropRate,
   restraint,
-  targetBonus,
+  targetNpBonus,
+  targetStarBonus,
 } from '@/base/formula';
 
 interface MoveCardPerformanceParams {
-  color:CardType,
-  activeRate:number,
-  buffType:BuffType,
-  round:number,
-  times:number,
-  value:number
+  color: CardType;
+  activeRate: number;
+  buffType: BuffType;
+  round: number;
+  times: number;
+  value: number;
 }
 
-export function moveCardPerformance (value:Array<MoveCardPerformanceParams>):() => void {
-  return function(this:Noble) {
-    let buffs:Array<Buff> = [];
+export function moveCardPerformance(
+  value: Array<MoveCardPerformanceParams>,
+): () => void {
+  return function(this: Noble) {
+    let buffs: Array<Buff> = [];
     value.forEach(t => {
       const id = Symbol(t.color);
-      let buff:Buff = {
+      let buff: Buff = {
         activeRate: t.activeRate,
         buffEffect: AttackBuffEffect.moveCardPerformance,
         buffType: t.buffType,
-        description ():string {
-          return t.color + (t.buffType === BuffType.strengthen ? '提升' : '下降');
+        description(): string {
+          return (
+            t.color + (t.buffType === BuffType.strengthen ? '提升' : '下降')
+          );
         },
-        handle (value:{ actionType:ActionType; [ p:string ]:any }):boolean {
-          if (value.actionType === ActionType.attack || value.actionType === ActionType.noble) {
-            if ((value.attackParams as NormalAttack).moveCardColor === t.color) {
-              (value.attackParams as NormalAttack).moveCardPerformance += t.value;
+        handle(value: { actionType: ActionType; [p: string]: any }): boolean {
+          if (
+            value.actionType === ActionType.attack ||
+            value.actionType === ActionType.noble
+          ) {
+            if (
+              (value.attackParams as NormalAttack).moveCardColor === t.color
+            ) {
+              (value.attackParams as NormalAttack).moveCardPerformance +=
+                t.value;
               return true;
             }
           }
           return false;
         },
         id,
-        remove: (removePower:number):boolean => {
+        remove: (removePower: number): boolean => {
           if (removePower > Math.random()) {
             let index = this.owner.buffStack.stack.findIndex(t => t.id === id);
             this.owner.buffStack.stack.splice(index, 1);
@@ -52,7 +63,7 @@ export function moveCardPerformance (value:Array<MoveCardPerformanceParams>):() 
           }
           return false;
         },
-        get shouldRemove () {
+        get shouldRemove() {
           return this.timer.round === 0 || this.timer.times === 0;
         },
         timer: { round: t.round, times: t.times },
@@ -72,61 +83,74 @@ export function moveCardPerformance (value:Array<MoveCardPerformanceParams>):() 
   };
 }
 
-export function attack (
-  moveCard:MoveCard,
-  attacker:ServantBase,
-  defender:ServantBase,
-  chainType:ChainType,
-  cardPosition:0 | 1 | 2 | 3,
-  firstCard:CardType,
+export function attack(
+  moveCard: MoveCard,
+  attacker: ServantBase,
+  defender: ServantBase,
+  chainType: ChainType,
+  cardPosition: 0 | 1 | 2 | 3,
+  firstCard: CardType,
 ) {
-  let attackInstance:NormalAttack = {
+  let attackInstance: NormalAttack = {
     attackPower: 0,
     busterChainBonus: chainType === ChainType.buster ? attacker.atk * 0.2 : 0,
     criticPower: 0,
     damageAppend: 0,
     defenceAppend: 0,
     defencePower: 0,
-    extraBonus: cardPosition !== 3 ? 1 : chainType === ChainType.buster ? 3.5 : 2,
+    extraBonus:
+      cardPosition !== 3 ? 1 : chainType === ChainType.buster ? 3.5 : 2,
     firstBonus: firstCard === CardType.buster ? 0.5 : 0,
-    hiddenStatus: hiddenCharacteristicRestraint(attacker.hiddenCharacteristic, defender.hiddenCharacteristic),
-    get isCritic () {
+    hiddenStatus: hiddenCharacteristicRestraint(
+      attacker.hiddenCharacteristic,
+      defender.hiddenCharacteristic,
+    ),
+    get isCritic() {
       return Math.random() < moveCard.criticRate ? 1 : 0;
     },
     moveCardColor: moveCard.cardType,
     moveCardEndurance: 0,
     moveCardHitRate: moveCard.hitsRate,
     moveCardPerformance: 0,
-    moveCardRate: cardPosition === 3 ? 1 : moveCard.basePowerRate * (1 + 0.2 * cardPosition),
-    random: (0.9 + Math.random() * 0.2),
+    moveCardRate:
+      cardPosition === 3
+        ? 1
+        : moveCard.basePowerRate * (1 + 0.2 * cardPosition),
+    random: 0.9 + Math.random() * 0.2,
     rankRestraint: restraint(attacker.servantClass, defender.servantClass),
     rankSupplement: classAttackPatch(attacker.servantClass),
     specialAttack: 0,
     specialDefend: 0,
   };
-  let attackerNpInstance:AttackerNp = {
+  let attackerNpInstance: AttackerNp = {
     NpBonus: 0,
     firstBonus: firstCard === CardType.art ? 1 : 0,
-    get isCritic () {
+    get isCritic() {
       return attackInstance.isCritic + 1;
     },
     moveCardEndurance: 0,
     moveCardPerformance: 0,
-    moveCaredBonus: moveCard.cardType === CardType.buster ? 0 : cardPosition === 3 ? 1 : ((moveCard.cardType === CardType.art ? 3 : 1) * (1 + (0.5 * cardPosition))),
+    moveCaredBonus:
+      moveCard.cardType === CardType.buster
+        ? 0
+        : cardPosition === 3
+        ? 1
+        : (moveCard.cardType === CardType.art ? 3 : 1) *
+          (1 + 0.5 * cardPosition),
     npRate: attacker.npType === 'process' ? moveCard.npRate : 0,
     overKillBonus: 0,
-    targetBonus: 0,
+    targetBonus: targetNpBonus(defender.servantClass),
   };
-  let defenderNpInstance:DefenderNp = {
+  let defenderNpInstance: DefenderNp = {
     attackerNpBonus: 0,
     defenceNpBonus: 0,
     defenceNpRate: defender.npType === 'process' ? defender.npRate : 0,
     npBuff: 0,
     overKillBonus: 0,
   };
-  let starBonusInstance:StarBonus = {
+  let starBonusInstance: StarBonus = {
     firstBonus: firstCard === CardType.quick ? 0.2 : 0,
-    get isCritic () {
+    get isCritic() {
       return attackInstance.isCritic === 0 ? 0 : 0.2;
     },
     moveCardEndurance: 0,
@@ -135,31 +159,67 @@ export function attack (
     overKillBonus: 0,
     servantStarDropRate: attacker.starDropRate,
     starDropRateBuff: 0,
-    targetBonus: targetBonus(defender.servantClass),
+    targetBonus: targetStarBonus(defender.servantClass),
     targetStarDropRateBuff: 0,
   };
-  attacker.buffStack.handle({ actionType: ActionType.attack, attackInstance, defender });
-  attacker.buffStack.handle({ actionType: ActionType.attackerBonusNp, attackerNpInstance, defender });
-  attacker.buffStack.handle({ actionType: ActionType.calculateStar, starBonusInstance, defender });
+  attacker.buffStack.handle({
+    actionType: ActionType.attack,
+    attackInstance,
+    defender,
+  });
+  attacker.buffStack.handle({
+    actionType: ActionType.attackerBonusNp,
+    attackerNpInstance,
+    defender,
+  });
+  attacker.buffStack.handle({
+    actionType: ActionType.calculateStar,
+    starBonusInstance,
+    defender,
+  });
 
-  defender.buffStack.handle({ actionType: ActionType.defence, attackInstance, attacker });
-  defender.buffStack.handle({ actionType: ActionType.defenderBonusNp, defenderNpInstance, attacker });
-  defender.buffStack.handle({ actionType: ActionType.calculateStar, starBonusInstance, attacker });
+  defender.buffStack.handle({
+    actionType: ActionType.defence,
+    attackInstance,
+    attacker,
+  });
+  defender.buffStack.handle({
+    actionType: ActionType.defenderBonusNp,
+    defenderNpInstance,
+    attacker,
+  });
+  defender.buffStack.handle({
+    actionType: ActionType.calculateStar,
+    starBonusInstance,
+    attacker,
+  });
 
   const damage = calculationNormalDamage(attackInstance, attacker.atk);
   const hitChain = moveCard.hitsChain;
   const TotalHit = moveCard.hitsRate;
-  let star:number = 0;
+  let star: number = 0;
   hitChain.forEach(t => {
     defender.hpAdd(-(damage / (t / TotalHit)), false);
     attackerNpInstance.overKillBonus = defender.hp === 0 ? 1.5 : 1;
     defenderNpInstance.overKillBonus = defender.hp === 0 ? 1.5 : 1;
     starBonusInstance.overKillBonus = defender.hp === 0 ? 0.3 : 0;
-    attacker.np = attacker.np + Number(calculationAttackerBonusNp(attackerNpInstance).toFixed(2));
-    defender.np = defender.np + Number(calculationAttackerBonusNp(attackerNpInstance).toFixed(2));
+    attacker.np =
+      attacker.np +
+      Number(calculationAttackerBonusNp(attackerNpInstance).toFixed(2));
+    defender.np =
+      defender.np +
+      Number(calculationAttackerBonusNp(attackerNpInstance).toFixed(2));
     star += calculationStarBonus(starBonusInstance);
   });
-  attacker.buffStack.handle({ actionType: ActionType.afterAttack, target: defender, attackInstance });
-  defender.buffStack.handle({ actionType: ActionType.afterDefence, target: attacker, attackInstance });
+  attacker.buffStack.handle({
+    actionType: ActionType.afterAttack,
+    target: defender,
+    attackInstance,
+  });
+  defender.buffStack.handle({
+    actionType: ActionType.afterDefence,
+    target: attacker,
+    attackInstance,
+  });
   defender.hpAdd(-0, true);
 }
