@@ -11,7 +11,7 @@ declare global {
   }
 
   type ServantClass =
-    'saber'
+    | 'saber'
     | 'lancer'
     | 'archer'
     | 'rider'
@@ -23,7 +23,7 @@ declare global {
     | 'berserker'
     | 'shielder'
     | 'foreigner'
-    | 'alterEgo'
+    | 'alterego'
     | 'beast1'
     | 'beast2'
     | 'beast3'
@@ -31,7 +31,7 @@ declare global {
     | 'beast5'
     | 'beast6'
     | 'beast7'
-  type hiddenCharacteristic = 'god' | 'legend' | 'human' | 'star'
+  type hiddenCharacteristic = 'god' | 'legend' | 'human' | 'star' | 'beast'
   // type moveCardColor = 'buster' | 'quick' | 'art' | 'extra'
 
   type scenes = 'attack' | 'defend' | 'afterAttack' | 'afterDefend' | 'death' | 'roundStart' | 'roundEnd'
@@ -167,31 +167,36 @@ declare global {
     attackerBonusNp,//攻击者np
     defenderBonusNp,//防御者np
     attack,//攻击
-    afterAttack,//攻击
+    calculateStar,//计算指令卡攻击暴击星
+    afterAttack,//攻击后
     noble,//宝具
     defence,//防御
-    afterDefence,//防御
+    afterDefence,//防御后
     roundEnd,//回合结束
     death,//角色战败
     defeated,//玩家战败
     defeat,//玩家胜利
   }
+
   enum StrengthenType {
     attack,
     defence
   }
+
   enum CardType {
     buster,
     art,
     quick,
     extra
   }
+
   enum NobleType {
     allTarget,
     single,
     support
   }
-  enum ChainType{
+
+  enum ChainType {
     buster,
     quick,
     art,

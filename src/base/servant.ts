@@ -56,6 +56,9 @@ export abstract class ServantBase {
   suitHp:number = 0;
   HpBuff:Array<DirectlyEffectiveBuff> = [];
 
+  //掉星率
+  abstract starDropRate:number;
+
   get hpMax () {
     return this.#hp + this.strengthenHp + (buffs => {
       let total = 0;
@@ -97,13 +100,15 @@ export abstract class ServantBase {
   #np:number = 0;
 
   get np () {
-    return this.#np|0;
+    return this.#np | 0;
   }
 
   set np (value) {
     this.#np = Math.max(0, Math.min((this.#np + value), this.maxNp));
     if (this.#np > 99 && this.#np < 100) {
       this.#np = 100;
+    } else if (this.#np < 0) {
+      this.#np = 0;
     }
   }
 
@@ -183,7 +188,7 @@ export abstract class ServantBase {
           return 4;
         case 'foreigner':
           return 5;
-        case 'alterEgo':
+        case 'alterego':
           return 3;
         default:
           return 4;

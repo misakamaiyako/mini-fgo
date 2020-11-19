@@ -21,7 +21,8 @@ export class AltriaPendragonSaber extends ServantBase{
     super();
     let cards = AltriaPendragonCards()
     this.MoveCard = data.moveCard.forEach(t=>{
-      return new MoveCard.apply(cards.next())
+      // @ts-ignore
+      return new MoveCard(...cards.next().value)
     })
   }
 }
