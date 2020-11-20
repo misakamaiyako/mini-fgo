@@ -1,7 +1,7 @@
 import Noble from '@/base/noble';
 import MoveCard from '@/base/moveCard';
 import { ServantBase } from '@/base/servant';
-import { AttackerNp, DefenderNp, NormalAttack, StarBonus } from '@/base/attack';
+import { AttackerNp, DefenderNp, NobelAttack, NormalAttack, StarBonus } from '@/base/attack';
 import {
   calculationAttackerBonusNp,
   calculationNormalDamage,
@@ -222,4 +222,24 @@ export function attack(
     attackInstance,
   });
   defender.hpAdd(-0, true);
+}
+function NobleAttack (nobleCard:Noble, attacker:ServantBase, defender:Array<ServantBase>) {
+  let nobleInstance:NobelAttack = {
+    attackPower: 0,
+    damageAppend: 0,
+    defenceAppend: 0,
+    defencePower: 0,
+    hiddenStatus: 0,
+    moveCardEndurance: 0,
+    moveCardPerformance: 0,
+    moveCardRate: nobleCard.basePowerRate,
+    noblePower: 0,
+    nobleRate: nobleCard.nobleRate,
+    nobleSpecialAttack: 0,
+    random: 0.9 + Math.random() * 0.2,
+    rankRestraint: 1,
+    rankSupplement: classAttackPatch(attacker.servantClass),
+    specialAttack: 0,
+    specialDefend: 0
+  }
 }

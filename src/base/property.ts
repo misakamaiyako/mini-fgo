@@ -1,3 +1,11 @@
+enum AggressiveTendency {
+  AllHP,
+  tendHP,
+  stable,
+  tendATK,
+  AllATK,
+  SaberLily,
+}
 const mana = [
   0.5,
   0.55,
@@ -61,15 +69,6 @@ const rankSupplementATK = {
   [ServantClass.beast3R]: 1,
   [ServantClass.beastUnknow]: 1,
 };
-
-enum AggressiveTendency {
-  AllHP,
-  tendHP,
-  stable,
-  tendATK,
-  AllATK,
-  SaberLily,
-}
 
 const aggressiveTendHP = {
   [AggressiveTendency.AllHP]: 1.1,

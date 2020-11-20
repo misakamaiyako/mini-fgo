@@ -164,32 +164,32 @@ export abstract class ServantBase {
         return this.specialNpBLocks;
       }
       switch (this.servantClass) {
-        case 'saber':
+        case ServantClass.saber:
           return 4;
-        case 'lancer':
+        case ServantClass.archer:
+          return 3;
+        case ServantClass.lancer:
           return 4;
-        case 'archer':
-          return 3;
-        case 'rider':
+        case ServantClass.rider:
           return 5;
-        case 'caster':
+        case ServantClass.caster:
           return 5;
-        case 'assassin':
+        case ServantClass.assassin:
           return 3;
-        case 'ruler':
+        case ServantClass.berserker:
+          return 3;
+        case ServantClass.ruler:
           return 4;
-        case 'moonCancer':
-          return 3;
-        case 'avenger':
+        case ServantClass.avenger:
           return 5;
-        case 'berserker':
+        case ServantClass.alterego:
           return 3;
-        case 'shielder':
+        case ServantClass.moonCancer:
+          return 3;
+        case ServantClass.foreigner:
+          return 5;
+        case ServantClass.shielder:
           return 4;
-        case 'foreigner':
-          return 5;
-        case 'alterego':
-          return 3;
         default:
           return 4;
       }

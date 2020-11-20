@@ -99,3 +99,24 @@ export interface StarBonus {
   isCritic: number;
   overKillBonus: number;
 }
+
+//(ATK * 0.23 * 宝具伤害倍率 * 指令卡伤害倍率 * (1 ± 指令卡性能BUFF ∓ 指令卡耐性) * 职阶补正 * 职阶克制 * 隐藏属性克制 * (1 ± 攻击力BUFF ∓ 防御力BUFF - 特防状态BUFF) * (1 + 特攻状态加成 ± 宝具威力BUFF) * 宝具特攻倍率 * 随机数) ± 伤害附加与减免 ∓ 被伤害减免与提升
+
+export interface NobelAttack{
+  nobleRate:number;
+  moveCardRate:number;
+  moveCardPerformance:number;
+  moveCardEndurance:number;
+  rankSupplement:number;
+  rankRestraint:number;
+  hiddenStatus:number;
+  attackPower:number;
+  defencePower: number;
+  specialDefend: number;
+  specialAttack:number;
+  noblePower:number;
+  nobleSpecialAttack:number;
+  random:number;
+  damageAppend: number;
+  defenceAppend: number
+}

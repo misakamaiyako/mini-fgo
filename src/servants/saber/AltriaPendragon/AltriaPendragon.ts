@@ -12,10 +12,10 @@ export class AltriaPendragonSaber extends ServantBase{
   name='阿尔托莉雅·潘德拉贡';
   npRate=0.03;
   positiveSkill:Array<Skill> =[];
-  servantClass:ServantClass='saber';
+  servantClass=ServantClass.saber;
   skills:Array<Skill> = [];
   useDefaultHPLine:boolean = true;
-  baseHp:number;
+  baseHp:number =10000;
   noble:Noble;
   constructor (data:unknown) {
     super();
@@ -25,6 +25,8 @@ export class AltriaPendragonSaber extends ServantBase{
       return new MoveCard(...cards.next().value)
     })
   }
+
+  starDropRate:number;
 }
 //
 function* AltriaPendragonCards (){
