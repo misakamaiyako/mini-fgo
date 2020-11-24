@@ -45,18 +45,6 @@ export interface NormalAttack {
   busterChainBonus: number;
 }
 
-// (ATK * 0.23 * 宝具伤害倍率 * 指令卡伤害倍率 * (1 ± 指令卡性能BUFF ∓ 指令卡耐性) * 职阶补正 * 职阶克制 * 隐藏属性克制 * (1 ± 攻击力BUFF ∓ 防御力BUFF - 特防状态BUFF) * (1 + 特攻状态加成 ± 宝具威力BUFF) * 宝具特攻倍率 * 随机数) ± 伤害附加与减免 ∓ 被伤害减免与提升
-export interface NobleAttack extends NormalAttack {
-  nobleRate: number; //宝具伤害倍率
-  firstBonus: 0; //-首位加成
-  isCritic: 0; //-暴击补正
-  criticPower: 0; //-暴击威力BUFF
-  noblePower: number; //宝具威力BUFF
-  extraBonus: 1; //-Extra攻击加成
-  nobleSpecialAttack: number; //宝具特攻倍率
-  busterChainBonus: 0; //-BusterChain加成
-}
-
 export interface AttackerNp {
   //NP率
   npRate: number;

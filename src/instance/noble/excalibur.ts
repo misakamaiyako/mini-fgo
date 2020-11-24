@@ -1,7 +1,8 @@
 import Noble from '@/base/noble';
 import { moveCardPerformance } from '@/factory/actions';
+import { ServantBase } from '@/base/servant';
 
-class EXcalibar extends Noble {
+export default class EXcalibar extends Noble {
   name = '誓约胜利之剑';
   cardType = CardType.buster;
   nobleType = NobleType.allTarget;
@@ -18,4 +19,7 @@ class EXcalibar extends Noble {
   ];
   npRate = 0.86;
   hitsChain:Array<number> = [ 100 ];
+  constructor (leave:number, owner:ServantBase,npRate:number,hitsChain:Array<number>) {
+    super(leave,owner,CardType.buster,npRate,hitsChain);
+  }
 }

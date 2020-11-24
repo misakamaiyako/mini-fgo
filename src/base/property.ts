@@ -1,4 +1,4 @@
-enum AggressiveTendency {
+export enum AggressiveTendency {
   AllHP,
   tendHP,
   stable,
@@ -6,7 +6,27 @@ enum AggressiveTendency {
   AllATK,
   SaberLily,
 }
-const mana = [
+export const universal = {
+  [PanelPropertiesUniversal.EX]: 1.04,
+  [PanelPropertiesUniversal['A++']]: 1.03,
+  [PanelPropertiesUniversal['A+']]:1.025,
+  [PanelPropertiesUniversal.A]:1.02,
+  [PanelPropertiesUniversal['A-']]:1.015,
+  [PanelPropertiesUniversal['B++']]: 1.01,
+  [PanelPropertiesUniversal['B+']]:1.005,
+  [PanelPropertiesUniversal.B]:1,
+  [PanelPropertiesUniversal['C++']]:0.995,
+  [PanelPropertiesUniversal['C+']]:0.9925,
+  [PanelPropertiesUniversal['C']]:0.99,
+  [PanelPropertiesUniversal['C-']]:0.9875,
+  [PanelPropertiesUniversal['D++']]:0.985,
+  [PanelPropertiesUniversal['D+']]:0.9825,
+  [PanelPropertiesUniversal['D']]:0.98,
+  [PanelPropertiesUniversal['E+']]:0.9725,
+  [PanelPropertiesUniversal['E']]:0.97,
+
+}
+export const mana = [
   0.5,
   0.55,
   0.575,
@@ -25,11 +45,11 @@ const mana = [
   0.975,
   1.0,
 ];
-const maxHP = [8500, 7500, 8500, 10000, 12500, 15000];
-const maxATK = [6200, 5500, 6200, 7000, 9000, 11000];
-const baseHP = [1600, 1500, 1600, 1800, 2000, 2200];
-const baseATK = [1100, 1000, 1100, 1300, 1500, 1700];
-const rankSupplementHP = {
+export const maxHP = [8500, 7500, 8500, 10000, 12500, 15000];
+export const maxATK = [6200, 5500, 6200, 7000, 9000, 11000];
+export const baseHP = [1600, 1500, 1600, 1800, 2000, 2200];
+export const baseATK = [1100, 1000, 1100, 1300, 1500, 1700];
+export const rankSupplementHP = {
   [ServantClass.saber]: 1.01,
   [ServantClass.archer]: 0.98,
   [ServantClass.lancer]: 1.02,
@@ -49,7 +69,7 @@ const rankSupplementHP = {
   [ServantClass.beast3R]: 1,
   [ServantClass.beastUnknow]: 1,
 };
-const rankSupplementATK = {
+export const rankSupplementATK = {
   [ServantClass.saber]: 1.01,
   [ServantClass.archer]: 1.02,
   [ServantClass.lancer]: 0.98,
@@ -70,7 +90,7 @@ const rankSupplementATK = {
   [ServantClass.beastUnknow]: 1,
 };
 
-const aggressiveTendHP = {
+export const aggressiveTendHP = {
   [AggressiveTendency.AllHP]: 1.1,
   [AggressiveTendency.tendHP]: 1.05,
   [AggressiveTendency.stable]: 1,
@@ -78,7 +98,7 @@ const aggressiveTendHP = {
   [AggressiveTendency.AllATK]: 0.9,
   [AggressiveTendency.SaberLily]: 0.85,
 };
-const aggressiveTendATK = {
+export const aggressiveTendATK = {
   [AggressiveTendency.AllATK]: 1.1,
   [AggressiveTendency.tendATK]: 1.05,
   [AggressiveTendency.stable]: 1,

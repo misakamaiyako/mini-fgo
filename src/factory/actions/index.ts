@@ -3,7 +3,7 @@ import MoveCard from '@/base/moveCard';
 import { ServantBase } from '@/base/servant';
 import { AttackerNp, DefenderNp, NobelAttack, NormalAttack, StarBonus } from '@/base/attack';
 import {
-  calculationAttackerBonusNp,
+  calculationAttackerBonusNp, calculationNobleDamage,
   calculationNormalDamage,
   calculationStarBonus,
   classAttackPatch,
@@ -90,6 +90,7 @@ export function attack(
   chainType: ChainType,
   cardPosition: 0 | 1 | 2 | 3,
   firstCard: CardType,
+  willChangeTarget:boolean
 ) {
   let attackInstance: NormalAttack = {
     attackPower: 0,
@@ -162,31 +163,32 @@ export function attack(
     targetBonus: targetStarBonus(defender.servantClass),
     targetStarDropRateBuff: 0,
   };
+
   attacker.buffStack.handle({
     actionType: ActionType.attack,
     attackInstance,
     defender,
   });
-  attacker.buffStack.handle({
-    actionType: ActionType.attackerBonusNp,
-    attackerNpInstance,
-    defender,
-  });
-  attacker.buffStack.handle({
-    actionType: ActionType.calculateStar,
-    starBonusInstance,
-    defender,
-  });
-
   defender.buffStack.handle({
     actionType: ActionType.defence,
     attackInstance,
     attacker,
   });
+
+  attacker.buffStack.handle({
+    actionType: ActionType.attackerBonusNp,
+    attackerNpInstance,
+    defender,
+  });
   defender.buffStack.handle({
     actionType: ActionType.defenderBonusNp,
     defenderNpInstance,
     attacker,
+  });
+  attacker.buffStack.handle({
+    actionType: ActionType.calculateStar,
+    starBonusInstance,
+    defender,
   });
   defender.buffStack.handle({
     actionType: ActionType.calculateStar,
@@ -221,9 +223,9 @@ export function attack(
     target: attacker,
     attackInstance,
   });
-  defender.hpAdd(-0, true);
+  defender.hpAdd(-0, willChangeTarget);
 }
-function NobleAttack (nobleCard:Noble, attacker:ServantBase, defender:Array<ServantBase>) {
+function NobleAttack (nobleCard:Noble,nobleRate:number, attacker:ServantBase, defender:Array<ServantBase>) {
   let nobleInstance:NobelAttack = {
     attackPower: 0,
     damageAppend: 0,
@@ -234,12 +236,118 @@ function NobleAttack (nobleCard:Noble, attacker:ServantBase, defender:Array<Serv
     moveCardPerformance: 0,
     moveCardRate: nobleCard.basePowerRate,
     noblePower: 0,
-    nobleRate: nobleCard.nobleRate,
+    nobleRate,
     nobleSpecialAttack: 0,
     random: 0.9 + Math.random() * 0.2,
     rankRestraint: 1,
     rankSupplement: classAttackPatch(attacker.servantClass),
     specialAttack: 0,
     specialDefend: 0
-  }
+  };
+  let starBonusInstance: StarBonus = {
+    firstBonus: 0,
+    isCritic:0,
+    moveCardEndurance: 0,
+    moveCardPerformance: 0,
+    moveCardStarDropRate: moveCardStarDropRate(nobleCard.cardType, 0),
+    overKillBonus: 0,
+    servantStarDropRate: attacker.starDropRate,
+    starDropRateBuff: 0,
+    targetBonus: 0,
+    targetStarDropRateBuff: 0,
+  };
+  let attackerNpInstance: AttackerNp = {
+    NpBonus: 0,
+    firstBonus:  0,
+    isCritic:1,
+    moveCardEndurance: 0,
+    moveCardPerformance: 0,
+    moveCaredBonus:
+      nobleCard.cardType === CardType.buster
+        ? 0
+        : (nobleCard.cardType === CardType.art ? 3 : 1),
+    npRate: attacker.npType === 'process' ? nobleCard.npRate : 0,
+    overKillBonus: 0,
+    targetBonus: 0,
+  };
+  const defenderCount = defender.length;
+  defender.forEach((t,index)=>{
+    const shouldReduce = index===defenderCount
+    let atkInstance:NobelAttack = {...nobleInstance};
+    let starInstance = {...starBonusInstance,targetBonus: targetStarBonus(t.servantClass)};
+    let npInstance = {...attackerNpInstance,targetBonus: targetNpBonus(t.servantClass)};
+    let defenderNpInstance: DefenderNp = {
+      attackerNpBonus: 0,
+      defenceNpBonus: 0,
+      defenceNpRate: t.npType === 'process' ? t.npRate : 0,
+      npBuff: 0,
+      overKillBonus: 0,
+    };
+
+    t.buffStack.handle({
+      actionType: ActionType.beNoble,
+      nobleInstance:atkInstance,
+      attacker,
+    });
+    t.buffStack.handle({
+      actionType: ActionType.beNoble,
+      attackInstance:atkInstance,
+      attacker,
+    });
+
+
+    attacker.buffStack.handle({
+      actionType: ActionType.attackerBonusNp,
+      attackerNpInstance,
+      defender:t,
+      shouldReduce
+    });
+    t.buffStack.handle({
+      actionType: ActionType.defenderBonusNp,
+      defenderNpInstance,
+      attacker,
+    });
+
+    attacker.buffStack.handle({
+      actionType: ActionType.calculateStar,
+      starBonusInstance,
+      defender,
+      shouldReduce
+    });
+    t.buffStack.handle({
+      actionType: ActionType.calculateStar,
+      starBonusInstance,
+      attacker,
+    });
+
+    const damage = calculationNobleDamage(atkInstance, attacker.atk);
+    const hitChain = nobleCard.hitsChain;
+    const TotalHit = nobleCard.hitsRate;
+    let star: number = 0;
+    hitChain.forEach(g => {
+      t.hpAdd(-(damage / (g / TotalHit)), false);
+      attackerNpInstance.overKillBonus = t.hp === 0 ? 1.5 : 1;
+      defenderNpInstance.overKillBonus = t.hp === 0 ? 1.5 : 1;
+      starBonusInstance.overKillBonus = t.hp === 0 ? 0.3 : 0;
+      attacker.np =
+        attacker.np +
+        Number(calculationAttackerBonusNp(attackerNpInstance).toFixed(2));
+      t.np =
+        t.np +
+        Number(calculationAttackerBonusNp(attackerNpInstance).toFixed(2));
+      star += calculationStarBonus(starBonusInstance);
+    });
+    attacker.buffStack.handle({
+      actionType: ActionType.afterAttack,
+      target: defender,
+      attackInstance:atkInstance,
+      shouldReduce
+    });
+    t.buffStack.handle({
+      actionType: ActionType.afterDefence,
+      target: attacker,
+      attackInstance:atkInstance,
+    });
+    t.hpAdd(-0, true);
+  })
 }

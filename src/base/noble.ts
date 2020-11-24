@@ -11,10 +11,9 @@ export default abstract class Noble extends MoveCard {
   readonly starRate = 0;
   readonly criticRate = 0;
   readonly commanderCard = undefined;
-  nobleRate:number;
 
-  protected constructor (leave:number, owner:ServantBase) {
-    super({ owner });
+  protected constructor (leave:number, owner:ServantBase,cardType:CardType,npRate:number,hitsChain:Array<number>) {
+    super(cardType,npRate,hitsChain,owner);
     this.leave = leave;
   }
 }

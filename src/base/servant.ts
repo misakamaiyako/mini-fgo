@@ -38,12 +38,6 @@ export abstract class ServantBase {
   level:number = 0;
 
   /**
-   * @description 是否使用成长曲线计算血量
-   * @todo 添加成长曲线
-   */
-  abstract useDefaultHPLine:boolean;
-
-  /**
    * @description 指令卡，可以为空
    */
   moveCard:Array<MoveCard> = [];
@@ -54,19 +48,13 @@ export abstract class ServantBase {
   abstract baseHp:number;
   strengthenHp:number = 0;//fufu
   suitHp:number = 0;
-  HpBuff:Array<DirectlyEffectiveBuff> = [];
+  HpBuff:number = 0;
 
   //掉星率
   abstract starDropRate:number;
 
   get hpMax () {
-    return this.#hp + this.strengthenHp + (buffs => {
-      let total = 0;
-      buffs.forEach(t => {
-        total += t.value;
-      });
-      return total;
-    })(this.HpBuff);
+    return this.baseHp + this.strengthenHp + this.suitHp + this.HpBuff;
   }
 
   #hp:number = 0;
@@ -115,7 +103,7 @@ export abstract class ServantBase {
   /**
    * @description 攻击力
    */
-  baseAttack:number = 0;
+  abstract baseAttack:number = 0;
   strengthenAttack:number = 0;//fufu
   suitAttack:number = 0;
 
@@ -207,7 +195,7 @@ export abstract class ServantBase {
   abstract MoveCard:Array<MoveCard>;
 
   /**
-   * @description 角色属性
+   * @description 角色特性
    */
   abstract characteristic:Set<characteristic>;
 
