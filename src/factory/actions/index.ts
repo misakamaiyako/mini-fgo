@@ -225,7 +225,7 @@ export function attack(
   });
   defender.hpAdd(-0, willChangeTarget);
 }
-function NobleAttack (nobleCard:Noble,nobleRate:number, attacker:ServantBase, defender:Array<ServantBase>) {
+export function NobleAttack (nobleCard:Noble,nobleRate:number, attacker:ServantBase, defender:Array<ServantBase>) {
   let nobleInstance:NobelAttack = {
     attackPower: 0,
     damageAppend: 0,

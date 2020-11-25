@@ -1,8 +1,8 @@
 import {  ServantBase } from '@/base/servant';
 import MoveCard from '@/base/moveCard';
-export default abstract class Scenes {
+export default class Scenes {
   standbyServant:Array<ServantBase | null>;
-  abstract standbyEnemy:Array<ServantBase>;
+  standbyEnemy:Array<ServantBase> = [];
   diedServant:Array<ServantBase> = [];
   diedEnemy:Array<ServantBase> = [];
   activeServant:Array<ServantBase> = [];
@@ -41,7 +41,7 @@ export default abstract class Scenes {
     this.distributionCritStar();
   }
 
-  protected constructor (props:Array<ServantBase | null>) {
+  constructor (props:Array<ServantBase | null>) {
     if (this.checkTeam(props)) {
       this.activeServant = props.slice(0, 2) as Array<ServantBase>;
       this.standbyServant = props.slice(3, 5);
@@ -75,38 +75,22 @@ export default abstract class Scenes {
    */
   roundStart () {
     this.activeServant.forEach(t => {
-      t.moveProcesses.forEach(g => {
-        if (g.roundEnd) {
-          g.roundEnd(this.activeServant, this.activeEnemy);
-        }
-      });
+      t.buffStack.handle({actionType:ActionType.roundStart})
     });
     this.activeEnemy.forEach(t => {
-      t.moveProcesses.forEach(g => {
-        if (g.roundEnd) {
-          g.roundEnd(this.activeEnemy, this.activeServant);
-        }
-      });
+      t.buffStack.handle({actionType:ActionType.roundStart})
     });
     this.shuffle();
     this.distributionCritStar();
   }
 
   roundEnd () {
-    [ [ this.activeServant, this.activeEnemy ], [ this.activeEnemy, this.activeServant ] ].forEach(([ attacker, defender ], index) => {
-      attacker.forEach((t, index) => {
-        if (t.hp > 0) {
-          t.moveProcesses.forEach(g => {
-            if (g.roundEnd) {
-              g.roundEnd(attacker, defender);
-            }
-          });
-        } else {
-          t.moveProcesses.forEach(g => {
-            if (g.death) {
-              g.death(attacker, defender);
-            }
-          });
+    [  this.activeServant ,  this.activeEnemy ] .forEach((side, index) => {
+      side.forEach((t, index) => {
+          t.buffStack.handle({actionType:ActionType.roundEnd})
+          if (t.hp===0){
+            t.buffStack.handle({actionType:ActionType.death})
+          }
           if (index === 0) {
             this.activeServant.forEach(t => {
               t.MoveCard.forEach(g => {
@@ -123,7 +107,6 @@ export default abstract class Scenes {
               this.activeEnemy.splice(index, 0, <ServantBase>this.standbyEnemy.shift());
             }
           }
-        }
       });
     });
     this.winOrLose();

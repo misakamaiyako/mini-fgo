@@ -3,8 +3,9 @@ import Noble from '@/base/noble';
 import MoveCard from '@/base/moveCard';
 import EXcalibar from '@/instance/noble/excalibur';
 import growth from '@/servants/saber/AltriaPendragon/growth';
+require('@/base/enums')
 
-export class AltriaPendragonSaber extends ServantBase {
+export default class AltriaPendragonSaber extends ServantBase {
   MoveCard:Array<MoveCard> = [];
   characteristic:Set<characteristic> = new Set([ 'ride', 'dragon', 'altriaFace', 'godAndLegend', 'arthur', 'king', 'human' ]);
   hiddenCharacteristic:hiddenCharacteristic = 'legend';
@@ -14,21 +15,24 @@ export class AltriaPendragonSaber extends ServantBase {
   positiveSkill:Array<Skill> = [];
   servantClass = ServantClass.saber;
   skills:Array<Skill> = [];
-  useDefaultHPLine:boolean = true;
   noble:Noble;
-
-  constructor (data:{ noble:{ leave:number; }; }) {
-    super();
-    let cards = AltriaPendragonCards();
-    let card;
-    while ((card = cards.next()) && !card.done) {
-      this.MoveCard.push(new MoveCard(card.value.cardType, card.value.npRate, card.value.hitsChain, this));
-    }
-    this.noble = new EXcalibar(data.noble.leave, this, 0.86, [ 100 ]);
+  rare = Rare.SSR;
+  constructor (data: { fufu: { cards: number[]; atk: number; hp: number; }; commanderCardId: (number|undefined)[]; level: number; noble: { level: number; }; useDefault: boolean; status: { atk: number; hp: number; }; }) {
+    super(
+      AltriaPendragonCards.map((t,index)=>({
+        ...t,
+        fufu:data.fufu.cards[index],
+        commanderCardId:data.commanderCardId[index]
+      })),
+      data.level
+    );
+    this.noble = new EXcalibar(data.noble.level, this, 0.86, [ 100 ]);
     if (data.useDefault) {
-      const { atk, hp } = growth(data.leave);
+      const { atk, hp } = growth(data.level);
       this.baseAttack = atk;
       this.baseHp = hp;
+      this.strengthenAttack = data.fufu.atk;
+      this.strengthenHp = data.fufu.hp;
     } else {
       this.baseAttack = data.status.atk;
       this.baseHp = data.status.hp;
@@ -38,15 +42,14 @@ export class AltriaPendragonSaber extends ServantBase {
   starDropRate:number = 0.1;
   baseAttack:number;
   baseHp:number;
-  deathRate:number;
+  deathRate:number=0.21;
 }
 
-//
-function* AltriaPendragonCards ():Generator<{ npRate:number; cardType:CardType; hitsChain:number[] }, void, unknown> {
-  yield { cardType: CardType.quick, npRate: 0.86, hitsChain: [ 33, 67 ] };
-  yield { cardType: CardType.art, npRate: 0.86, hitsChain: [ 33, 67 ] };
-  yield { cardType: CardType.art, npRate: 0.86, hitsChain: [ 33, 67 ] };
-  yield { cardType: CardType.buster, npRate: 0.86, hitsChain: [ 100 ] };
-  yield { cardType: CardType.buster, npRate: 0.86, hitsChain: [ 100 ] };
-  yield { cardType: CardType.extra, npRate: 0.86, hitsChain: [ 33, 67 ] };
-}
+const AltriaPendragonCards = [
+  { cardType: CardType.quick, npRate: 0.86, hitsChain: [ 33, 67 ] },
+  { cardType: CardType.art, npRate: 0.86, hitsChain: [ 33, 67 ] },
+  { cardType: CardType.art, npRate: 0.86, hitsChain: [ 33, 67 ] },
+  { cardType: CardType.buster, npRate: 0.86, hitsChain: [ 100 ] },
+  { cardType: CardType.buster, npRate: 0.86, hitsChain: [ 100 ] },
+  { cardType: CardType.extra, npRate: 0.86, hitsChain: [ 12,25,63 ] }
+  ];

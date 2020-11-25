@@ -1,6 +1,7 @@
 import Noble from '@/base/noble';
-import { moveCardPerformance } from '@/factory/actions';
+import { NobleAttack } from '@/factory/actions';
 import { ServantBase } from '@/base/servant';
+import '@/base/enums'
 
 export default class EXcalibar extends Noble {
   name = '誓约胜利之剑';
@@ -8,18 +9,19 @@ export default class EXcalibar extends Noble {
   nobleType = NobleType.allTarget;
   valueArray = [ [ 4, 5, 5.5, 5.75, 6 ], [ 0.2, 0.275, .35, .425, 0.5 ] ];
   actions = [
-    moveCardPerformance([ {
-      color: CardType.buster,
-      activeRate: 1,
-      buffType: BuffType.strengthen,
-      times: Infinity,
-      round: 1,
-      value: 0.5,
-    } ]).bind(this),
+    () => {
+      if (this.owner.scenes?.activeEnemy) {
+        NobleAttack(this, this.npRate, this.owner, this.owner.scenes.activeEnemy);
+      }
+    },
+    () => {
+      this.owner.np = this.owner.np + this.valueArray[ 1 ][ this.overCharge - 1];
+    },
   ];
   npRate = 0.86;
   hitsChain:Array<number> = [ 100 ];
-  constructor (leave:number, owner:ServantBase,npRate:number,hitsChain:Array<number>) {
-    super(leave,owner,CardType.buster,npRate,hitsChain);
+
+  constructor (leave:number, owner:ServantBase, npRate:number, hitsChain:Array<number>) {
+    super(leave, owner, CardType.buster, npRate, hitsChain);
   }
 }

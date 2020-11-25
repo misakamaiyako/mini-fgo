@@ -22,7 +22,7 @@ export abstract class ServantBase {
    * @description 名称
    */
   abstract name:string;
-
+  abstract rare:Rare;
   /**
    * @description 主动技能组，可以为空
    */
@@ -35,7 +35,7 @@ export abstract class ServantBase {
   /**
    * @description 等级
    */
-  level:number = 0;
+  level:number;
 
   /**
    * @description 指令卡，可以为空
@@ -231,8 +231,15 @@ export abstract class ServantBase {
   death () {
 
   }
-}
 
+  protected constructor (cards:Cards[], level:number) {
+    this.moveCard = cards.map(t=>{
+      return new MoveCard(t.cardType,t.npRate,t.hitsChain,this,t.fufu,t.commanderCardId)
+    })
+    this.level = level
+  }
+}
+interface Cards {fufu:number, cardType:CardType, npRate:number, hitsChain:number[],commanderCardId:number|undefined}
 export abstract class SkillBase {
   abstract name:string;
   abstract coldDown:number;
