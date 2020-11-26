@@ -1,4 +1,5 @@
 import { ServantBase } from '@/base/servant';
+import { CardType } from '@/base/enums';
 
 /**
  * @description 指令卡类

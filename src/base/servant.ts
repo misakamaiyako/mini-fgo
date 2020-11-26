@@ -1,6 +1,7 @@
 import Scenes from '@/base/scenes';
 import Noble from '@/base/noble';
 import MoveCard from '@/base/moveCard';
+import { ActionType, CardType, Rare, ServantClass } from '@/base/enums';
 
 interface DirectlyEffectiveBuff {
   value:number,
@@ -63,7 +64,7 @@ export abstract class ServantBase {
   }
 
   set hp (value) {
-    this.#hp = value;
+    this.#hp = Math.min(value, this.hpMax);
   }
 
   hpAdd (value:number, damageEnd:boolean = true):number {
@@ -92,12 +93,17 @@ export abstract class ServantBase {
   }
 
   set np (value) {
-    this.#np = Math.max(0, Math.min((this.#np + value), this.maxNp));
+    this.#np = Math.max(0, Math.min(value, this.maxNp));
     if (this.#np > 99 && this.#np < 100) {
       this.#np = 100;
     } else if (this.#np < 0) {
       this.#np = 0;
     }
+  }
+
+  addNp (value:number):number {
+    this.np = this.np + value;
+    return this.np;
   }
 
   /**
@@ -189,10 +195,6 @@ export abstract class ServantBase {
    * @description 宝具
    */
   abstract noble:Noble;
-  /**
-   * @description 指令卡
-   */
-  abstract MoveCard:Array<MoveCard>;
 
   /**
    * @description 角色特性
@@ -228,18 +230,48 @@ export abstract class ServantBase {
     },
   };
 
+  position:'player' | 'enemy' = 'player';
+
   death () {
 
   }
 
+  getOpposite(){
+    if (this.scenes){
+      if (this.position==='player'){
+        return this.scenes.activeEnemy
+      } else {
+        return this.scenes.activeServant
+      }
+    }
+    return []
+  }
+  getTeammate(){
+    if (this.scenes){
+      if (this.position==='player'){
+        return this.scenes.activeServant
+      } else {
+        return this.scenes.activeEnemy
+      }
+    }
+    return []
+  }
   protected constructor (cards:Cards[], level:number) {
-    this.moveCard = cards.map(t=>{
-      return new MoveCard(t.cardType,t.npRate,t.hitsChain,this,t.fufu,t.commanderCardId)
-    })
-    this.level = level
+    this.moveCard = cards.map(t => {
+      return new MoveCard(t.cardType, t.npRate, t.hitsChain, this, t.fufu, t.commanderCardId);
+    });
+    this.level = level;
   }
 }
-interface Cards {fufu:number, cardType:CardType, npRate:number, hitsChain:number[],commanderCardId:number|undefined}
+
+interface Cards {
+  fufu:number,
+  cardType:CardType,
+  npRate:number,
+  hitsChain:number[],
+  commanderCardId:number | undefined
+}
+
 export abstract class SkillBase {
   abstract name:string;
   abstract coldDown:number;
@@ -255,7 +287,7 @@ export abstract class SkillBase {
     }
   }
 
-  constructor (owner:ServantBase) {
+  protected constructor (owner:ServantBase) {
     this.owner = owner;
   }
 }

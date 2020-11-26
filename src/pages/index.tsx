@@ -31,8 +31,15 @@ export default class Index extends React.Component<any, any>{
       status: { atk: 0, hp: 0 },
       useDefault: true
     })
-    let scenes = new Scenes([a,b,c])
-    scenes.activeEnemy = [
+    let d = new AltriaPendragonSaber({
+      commanderCardId: [],
+      fufu: { atk: 0, cards: [], hp: 0 },
+      level: 20,
+      noble: { level: 5 },
+      status: { atk: 0, hp: 0 },
+      useDefault: true
+    })
+    let scenes = new Scenes([a,b,c,d], [
       new AltriaPendragonSaber({
         commanderCardId: [],
         fufu: { atk: 0, cards: [], hp: 0 },
@@ -55,8 +62,12 @@ export default class Index extends React.Component<any, any>{
         status: { atk: 0, hp: 0 },
         useDefault: true
       })
-    ]
-    a.noble.active(1)
+    ].map(t=>{
+      t.baseHp=200000;
+      return t;
+    }))
+    a.np=123;
+    // a.noble.active(0)
     // @ts-ignore
     window.test = scenes;
   }

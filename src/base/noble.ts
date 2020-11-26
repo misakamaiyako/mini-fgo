@@ -1,5 +1,6 @@
 import { ServantBase } from '@/base/servant';
 import MoveCard from '@/base/moveCard';
+import { ActionType, CardType, NobleType } from '@/base/enums';
 
 export default abstract class Noble extends MoveCard {
   abstract name:string;
@@ -11,7 +12,7 @@ export default abstract class Noble extends MoveCard {
   readonly starRate = 0;
   readonly criticRate = 0;
   readonly commanderCard = undefined;
-  overCharge:number = 1;
+  overCharge:number = 0;
 
   protected constructor (leave:number, owner:ServantBase, cardType:CardType, npRate:number, hitsChain:Array<number>) {
     super(cardType, npRate, hitsChain, owner);

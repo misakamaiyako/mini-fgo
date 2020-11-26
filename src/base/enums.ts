@@ -1,4 +1,4 @@
-enum ServantClass {
+export enum ServantClass {
   saber,
   archer,
   lancer,
@@ -16,16 +16,16 @@ enum ServantClass {
   beast2,
   beast3L,
   beast3R,
-  beastUnknow,
+  beastUnknown,
 }
 
-enum BuffType {
+export enum BuffType {
   strengthen,
   weaken,
   notDuality,
 }
 
-enum AttackBuffEffect {
+export enum AttackBuffEffect {
   attack = 100, //攻击
   moveCardPerformance, //指令卡性能
   specialAttack, //特攻
@@ -39,7 +39,7 @@ enum AttackBuffEffect {
   ignoreDefence, //无视防御
 }
 
-enum defenceBuffEffect {
+export enum defenceBuffEffect {
   defence = 200, //防御
   defenceAttach, //防御附加
   specialDefence, //特防
@@ -50,29 +50,29 @@ enum defenceBuffEffect {
   toughness, //韧性
 }
 
-enum Critical {
+export enum Critical {
   concentrated = 300, //暴击星集中
   drop, //暴击星掉落率
   gain, //获得暴击星
 }
 
-enum NPState {
+export enum NPState {
   gainRate = 400, //np率
   gainRateOnTurnEnd, //回合结束时np获得
   gainRateOnGetHit, //受击np率
 }
 
-enum HPState {
+export enum HPState {
   recoverCoefficient = 500, //恢复系数
   recoverByTurnEnd, //回合结束时恢复
   maxHP, //最大生命值变化
 }
 
-enum AdditionalEffect {
+export enum AdditionalEffect {
   afterAttack = 600,
 }
 
-enum OtherEffect {
+export enum OtherEffect {
   targetConcentrated = 700, //目标集中
   statusSetChance, //状态赋予成功率
   specialEndurance, //特殊耐性
@@ -91,11 +91,11 @@ enum OtherEffect {
   others,
 }
 
-enum OtherEffect2 {
+export enum OtherEffect2 {
   others = 800,
 }
 
-enum BuffEffect {
+export enum BuffEffect {
   AttackBuffEffect,
   defenceBuffEffect,
   Critical,
@@ -106,14 +106,16 @@ enum BuffEffect {
   OtherEffect2,
 }
 
-enum ActionType {
+export enum ActionType {
   gameStart, //游戏开始
   approach, //登场
   drawCard, //抽卡
   dispatchStar, //分发暴击星
   starCountChange, //暴击星变化
-  strengthen, //强化
+  gaveStrengthen, //给强化
+  beStrengthen, //被强化
   weaken, //弱化
+  beWeaken, //被弱化
   heal, //治疗
   charge, //充能
   attackerBonusNp, //攻击者np
@@ -122,7 +124,7 @@ enum ActionType {
   calculateStar, //计算指令卡攻击暴击星
   afterAttack, //攻击后
   noble, //宝具
-  overCharge, //宝具阶段提升
+  overCharge, //宝具阶段提升(应该放在noble里，但是暂时想不出什么方法处理伤害计算和overcharge计算)
   beNoble, //被宝具攻击
   defence, //防御
   afterDefence, //防御后
@@ -133,32 +135,32 @@ enum ActionType {
   defeat, //玩家胜利
 }
 
-enum StrengthenType {
+export enum StrengthenType {
   attack,
   defence,
 }
 
-enum CardType {
+export enum CardType {
   buster,
   art,
   quick,
   extra,
 }
 
-enum NobleType {
+export enum NobleType {
   allTarget,
   single,
   support,
 }
 
-enum ChainType {
+export enum ChainType {
   buster,
   quick,
   art,
   none,
 }
 
-enum PanelPropertiesUniversal {
+export enum PanelPropertiesUniversal {
   EX,
   'A++',
   'A+',
@@ -178,6 +180,6 @@ enum PanelPropertiesUniversal {
   E,
 }
 
-enum Rare {
+export enum Rare {
   blank, U, UR, R, SR, SSR
 }

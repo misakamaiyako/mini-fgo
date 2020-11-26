@@ -1,12 +1,10 @@
 import { ServantBase } from '@/base/servant';
 import Noble from '@/base/noble';
-import MoveCard from '@/base/moveCard';
 import EXcalibar from '@/instance/noble/excalibur';
 import growth from '@/servants/saber/AltriaPendragon/growth';
-require('@/base/enums')
+import { CardType, Rare, ServantClass } from '@/base/enums';
 
 export default class AltriaPendragonSaber extends ServantBase {
-  MoveCard:Array<MoveCard> = [];
   characteristic:Set<characteristic> = new Set([ 'ride', 'dragon', 'altriaFace', 'godAndLegend', 'arthur', 'king', 'human' ]);
   hiddenCharacteristic:hiddenCharacteristic = 'legend';
   id = 2;

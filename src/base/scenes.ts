@@ -1,12 +1,14 @@
-import {  ServantBase } from '@/base/servant';
+import { ServantBase } from '@/base/servant';
 import MoveCard from '@/base/moveCard';
+import { ActionType } from '@/base/enums';
+
 export default class Scenes {
   standbyServant:Array<ServantBase | null>;
-  standbyEnemy:Array<ServantBase> = [];
+  standbyEnemy:Array<ServantBase | null> = [];
   diedServant:Array<ServantBase> = [];
   diedEnemy:Array<ServantBase> = [];
-  activeServant:Array<ServantBase> = [];
-  activeEnemy:Array<ServantBase> = [];
+  activeServant:Array<ServantBase | null> = [];
+  activeEnemy:Array<ServantBase | null> = [];
   /**
    * @description 洗好的指令卡
    */
@@ -41,13 +43,25 @@ export default class Scenes {
     this.distributionCritStar();
   }
 
-  constructor (props:Array<ServantBase | null>) {
-    if (this.checkTeam(props)) {
-      this.activeServant = props.slice(0, 2) as Array<ServantBase>;
-      this.standbyServant = props.slice(3, 5);
+  constructor (friends:Array<ServantBase>, enemy:Array<ServantBase>) {
+    if (this.checkTeam(friends)) {
+      friends.forEach((t) => {
+        t.hp = t.hpMax;
+        t.scenes = this;
+      });
+      enemy.forEach((t) => {
+        t.hp = t.hpMax;
+        t.scenes = this;
+        t.position = 'enemy'
+      });
+      this.activeServant = friends.slice(0, 3) as Array<ServantBase>;
+      this.standbyServant = friends.slice(3, 5);
+      this.activeEnemy = enemy.slice(0, 3) as Array<ServantBase>;
+      this.standbyEnemy = enemy.slice(3, 5);
     } else {
       throw new Error('你的编队不符合要求');
     }
+    this.gameStart();
   }
 
   checkTeam (servants:Array<ServantBase | null>):boolean {
@@ -70,43 +84,76 @@ export default class Scenes {
     return this.activeServant.length === 0;
   }
 
+  gameStart(){
+    [...this.activeServant,...this.standbyServant].forEach(t=>{
+      if (t){
+        t.buffStack.handle({actionType: ActionType.gameStart})
+      }
+    });
+    [...this.activeEnemy,...this.activeEnemy].forEach(t=>{
+      if (t){
+        t.buffStack.handle({actionType: ActionType.gameStart});
+      }
+    })
+    this.activeServant.forEach(t=>{
+      if (t){
+        t.buffStack.handle({actionType:ActionType.approach})
+      }
+    })
+    this.activeEnemy.forEach(t=>{
+      if (t){
+        t.buffStack.handle({actionType:ActionType.approach})
+      }
+    })
+  }
   /**
    * @description 回合开始后，抽取指令卡前
    */
   roundStart () {
     this.activeServant.forEach(t => {
-      t.buffStack.handle({actionType:ActionType.roundStart})
+      if (t) {
+        t.buffStack.handle({ actionType: ActionType.roundStart });
+      }
     });
     this.activeEnemy.forEach(t => {
-      t.buffStack.handle({actionType:ActionType.roundStart})
+      if (t) {
+        t.buffStack.handle({ actionType: ActionType.roundStart });
+      }
     });
     this.shuffle();
     this.distributionCritStar();
   }
 
-  roundEnd () {
-    [  this.activeServant ,  this.activeEnemy ] .forEach((side, index) => {
+
+
+  roundEnd (servants:(ServantBase|null)[]) {
+    servants.forEach(t=>{
+      if (t){
+        t.buffStack.handle
+      }
+    })
+    [ this.activeServant, this.activeEnemy ].forEach((side, index) => {
       side.forEach((t, index) => {
-          t.buffStack.handle({actionType:ActionType.roundEnd})
-          if (t.hp===0){
-            t.buffStack.handle({actionType:ActionType.death})
-          }
-          if (index === 0) {
-            this.activeServant.forEach(t => {
-              t.MoveCard.forEach(g => {
-                g.state = 'pool';
-              });
+        t.buffStack.handle({ actionType: ActionType.roundEnd });
+        if (t.hp === 0) {
+          t.buffStack.handle({ actionType: ActionType.death });
+        }
+        if (index === 0) {
+          this.activeServant.forEach(t => {
+            t.moveCard.forEach(g => {
+              g.state = 'pool';
             });
-            this.diedServant.push(this.activeServant.splice(index, 1)[ 0 ]);
-            if (this.standbyServant.length > 0) {
-              this.activeServant.splice(index, 0, <ServantBase>this.standbyServant.shift());
-            }
-          } else {
-            this.diedEnemy.push(this.activeEnemy.splice(index, 1)[ 0 ]);
-            if (this.standbyEnemy.length > 0) {
-              this.activeEnemy.splice(index, 0, <ServantBase>this.standbyEnemy.shift());
-            }
+          });
+          this.diedServant.push(this.activeServant.splice(index, 1)[ 0 ]);
+          if (this.standbyServant.length > 0) {
+            this.activeServant.splice(index, 0, <ServantBase>this.standbyServant.shift());
           }
+        } else {
+          this.diedEnemy.push(this.activeEnemy.splice(index, 1)[ 0 ]);
+          if (this.standbyEnemy.length > 0) {
+            this.activeEnemy.splice(index, 0, <ServantBase>this.standbyEnemy.shift());
+          }
+        }
       });
     });
     this.winOrLose();
@@ -120,7 +167,7 @@ export default class Scenes {
     if (this.availableMoveCard.length === 0 || flag) {
       let pool:MoveCard[] = [];
       this.activeServant.forEach(t => {
-        t.MoveCard.forEach(g => {
+        t.moveCard.forEach(g => {
           g.state = 'pool';
           pool.push(g);
         });
@@ -179,14 +226,14 @@ export default class Scenes {
     }
   }
 
-  startAttack(moveCards:Array<MoveCard>){
+  startAttack (moveCards:Array<MoveCard>) {
 
   }
 
   /**
    * @description 当前选择的对象
    */
-  target?:ServantBase
+  target?:ServantBase;
 }
 
 function shuffle<T> (array:Array<T>):Array<T> {

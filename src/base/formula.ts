@@ -1,4 +1,5 @@
 import { AttackerNp, DefenderNp, NobelAttack, NormalAttack, StarBonus } from '@/base/attack';
+import { CardType, ServantClass } from '@/base/enums';
 
 export function classAttackPatch (servantClass:ServantClass):number {
   const matrix = {
@@ -19,7 +20,7 @@ export function classAttackPatch (servantClass:ServantClass):number {
     [ ServantClass.beast2 ]: 1,
     [ ServantClass.beast3L ]: 1,
     [ ServantClass.beast3R ]: 1,
-    [ ServantClass.beastUnknow ]: 1,
+    [ ServantClass.beastUnknown ]: 1,
   };
   return matrix[ servantClass ] || 1;
 }
@@ -194,7 +195,7 @@ export function targetStarBonus (targetClass:ServantClass) {
     [ ServantClass.beast2 ]: 0,
     [ ServantClass.beast3L ]: 0,
     [ ServantClass.beast3R ]: 0,
-    [ ServantClass.beastUnknow ]: 0,
+    [ ServantClass.beastUnknown ]: 0,
   };
   return matrix[ targetClass ] || 0;
 }
@@ -218,12 +219,12 @@ export function targetNpBonus (targetClass:ServantClass) {
     [ ServantClass.beast2 ]: 1,
     [ ServantClass.beast3L ]: 1,
     [ ServantClass.beast3R ]: 1,
-    [ ServantClass.beastUnknow ]: 0,
+    [ ServantClass.beastUnknown ]: 0,
   };
   return matrix[ targetClass ] || 1;
 }
 
 //(ATK * 0.23 * 宝具伤害倍率 * 指令卡伤害倍率 * (1 ± 指令卡性能BUFF ∓ 指令卡耐性) * 职阶补正 * 职阶克制 * 隐藏属性克制 * (1 ± 攻击力BUFF ∓ 防御力BUFF - 特防状态BUFF) * (1 + 特攻状态加成 ± 宝具威力BUFF) * 宝具特攻倍率 * 随机数) ± 伤害附加与减免 ∓ 被伤害减免与提升
 export function calculationNobleDamage (attackInstance:NobelAttack, atk:number) {
-  return (atk * 0.23 * attackInstance.nobleRate * attackInstance.moveCardRate * (1 + attackInstance.moveCardPerformance - attackInstance.moveCardEndurance) * attackInstance.rankSupplement * attackInstance.rankRestraint * attackInstance.hiddenStatus * (1 + attackInstance.attackPower - attackInstance.defencePower - attackInstance.specialDefend) * (1 + attackInstance.specialAttack + attackInstance.noblePower) * attackInstance.nobleSpecialAttack * attackInstance.random) + attackInstance.damageAppend - attackInstance.defenceAppend;
+  return (atk * 0.23 * attackInstance.nobleRate * attackInstance.moveCardRate * (1 + attackInstance.moveCardPerformance - attackInstance.moveCardEndurance) * attackInstance.rankSupplement * attackInstance.rankRestraint * attackInstance.hiddenStatus * (1 + attackInstance.attackPower - attackInstance.defencePower - attackInstance.specialDefend) * (1 + attackInstance.specialAttack + attackInstance.noblePower) * (attackInstance.nobleSpecialAttack || 1) * attackInstance.random) + attackInstance.damageAppend - attackInstance.defenceAppend;
 }

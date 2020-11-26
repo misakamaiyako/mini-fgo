@@ -1,6 +1,7 @@
 // (ATK * 0.23 * ((指令卡伤害倍率 * (1 ± 指令卡性能BUFF ∓ 指令卡耐性)) + 首位加成) * 职阶补正 * 职阶克制 * 隐藏属性克制 * (1 ± 攻击力BUFF ∓ 防御力BUFF - 特防状态BUFF) * (1 + 暴击补正) * (1 + 特攻状态加成 ± 暴击威力BUFF * 暴击补正) * Extra攻击加成 * 指令卡Hit倍率 * 随机数) ± 伤害附加与减免 ∓ 被伤害减免与提升 + BusterChain加成
 //指令卡伤害倍率,首位加成,隐藏属性克制,暴击补正，Extra攻击加成,BusterChain加成,随机数在生成前计算，常量。在攻击前，所有的值都有默认值
 import { calculationNormalDamage } from '@/base/formula';
+import { CardType } from '@/base/enums';
 
 export interface NormalAttack {
   //指令卡伤害倍率

@@ -1,3 +1,5 @@
+import { PanelPropertiesUniversal, ServantClass } from '@/base/enums';
+
 export enum AggressiveTendency {
   AllHP,
   tendHP,
@@ -67,7 +69,7 @@ export const rankSupplementHP = {
   [ServantClass.beast2]: 1,
   [ServantClass.beast3L]: 1,
   [ServantClass.beast3R]: 1,
-  [ServantClass.beastUnknow]: 1,
+  [ServantClass.beastUnknown]: 1,
 };
 export const rankSupplementATK = {
   [ServantClass.saber]: 1.01,
@@ -87,7 +89,7 @@ export const rankSupplementATK = {
   [ServantClass.beast2]: 1,
   [ServantClass.beast3L]: 1,
   [ServantClass.beast3R]: 1,
-  [ServantClass.beastUnknow]: 1,
+  [ServantClass.beastUnknown]: 1,
 };
 
 export const aggressiveTendHP = {
