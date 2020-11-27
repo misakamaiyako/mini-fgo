@@ -72,7 +72,7 @@ export function moveCardPerformance (
       };
       buffs.push(buff);
     });
-    this.owner.buffStack.handle({ actionType: ActionType.strengthen, buffs });
+    this.owner.buffStack.handle({ actionType: ActionType.beStrengthen, buffs });
     buffs.forEach(buff => {
       if (buff.activeRate === -Infinity) {
         console.log('无效');
@@ -269,7 +269,6 @@ export function NobleAttack (nobleCard:Noble, nobleRate:number, attacker:Servant
   const defenderCount = defender.length;
   defender.forEach((t, index) => {
     if (t) {
-      const shouldReduce = index === defenderCount;
       let atkInstance:NobelAttack = {
         ...nobleInstance,
         hiddenStatus: hiddenCharacteristicRestraint(
@@ -309,7 +308,6 @@ export function NobleAttack (nobleCard:Noble, nobleRate:number, attacker:Servant
         actionType: ActionType.attackerBonusNp,
         attackerNpInstance,
         defender: t,
-        shouldReduce,
       });
       t.buffStack.handle({
         actionType: ActionType.defenderBonusNp,
@@ -321,7 +319,6 @@ export function NobleAttack (nobleCard:Noble, nobleRate:number, attacker:Servant
         actionType: ActionType.calculateStar,
         starBonusInstance,
         defender,
-        shouldReduce,
       });
       t.buffStack.handle({
         actionType: ActionType.calculateStar,
@@ -351,7 +348,6 @@ export function NobleAttack (nobleCard:Noble, nobleRate:number, attacker:Servant
         actionType: ActionType.afterAttack,
         target: defender,
         attackInstance: atkInstance,
-        shouldReduce,
       });
       t.buffStack.handle({
         actionType: ActionType.afterDefence,

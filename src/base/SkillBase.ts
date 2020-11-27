@@ -7,6 +7,9 @@ export abstract class SkillBase {
   abstract icon:string;
   abstract description:string;
   abstract effectValue:Array<number>;
+  abstract withStrength:boolean;
+  abstract withWeaken:boolean;
+
   leave:number;
 
   get maxColdDown () {
