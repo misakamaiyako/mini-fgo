@@ -2,15 +2,26 @@ import { ServantBase } from '@/base/servant';
 import { ActionType, BuffEffect, BuffType } from '@/base/enums';
 
 declare global {
-  interface Skill {
-    selfId:number;
-    name:string;
-    leave:number;
-    coolDown:number;
-    effect:(servant:ServantBase) => void;
+  abstract class SkillBase {
+    abstract name: string;
+    abstract originColdDown: number;
+    abstract actions: Array<() => void>;
+    abstract icon: string;
+    abstract description: string;
+    abstract effectValue: Array<number>;
+    abstract withStrength: boolean;
+    abstract withWeaken: boolean;
+    leave: number;
+    get maxColdDown():number;
+    coolDown: number;
+    owner: ServantBase;
+    get useCondition(): boolean;
+    protected constructor(data: {
+      leave: number;
+      owner: ServantBase;
+    });
+    use(): false | void;
   }
-
-
   type hiddenCharacteristic = 'god' | 'legend' | 'human' | 'star' | 'beast';
 
   type cardInit = { fufu:number; CommanderCardId?:number };

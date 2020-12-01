@@ -11,10 +11,11 @@ export class LeaderShipB extends SkillBase {
   actions = [
     () => {
       let action = { actionType: ActionType.gaveStrengthen, strengthType: StrengthenType.attack, chance: 1 };
-      const powerUp = this.effectValue[this.leave];
-      this.owner.buffStack.handle(action)
-      this.owner.getTeammate().forEach(t=>{
-        if (t){
+      const powerUp = this.effectValue[ this.leave ];
+      this.owner.buffStack.handle(action);
+      this.owner.getTeammate().forEach(t => {
+        if (t) {
+          const id = Symbol('atkUp');
           let buff:Buff = {
             activeRate: 0,
             buffEffect: BuffEffect.AttackBuffEffect,
@@ -23,31 +24,38 @@ export class LeaderShipB extends SkillBase {
               return '';
             },
             handle (value:{ actionType:ActionType, [ p:string ]:any }):boolean {
-              if(value.actionType===ActionType.attack){
-                (value.attackInstance as NormalAttack).attackPower+=powerUp;
-                return true
+              if (value.actionType === ActionType.attack) {
+                (value.attackInstance as NormalAttack).attackPower += powerUp;
+                return true;
               }
-              if (value.actionType===ActionType.noble){
-                (value.attackInstance as NobelAttack).attackPower+=powerUp;
-                return true
+              if (value.actionType === ActionType.noble) {
+                (value.attackInstance as NobelAttack).attackPower += powerUp;
+                return true;
               }
               return false;
             },
-            id: Symbol('atkUp'),
+            id,
             remove (removePower:number):boolean {
+              if (Math.random() > 1 - removePower) {
+                const index = t.buffStack.stack.findIndex(t => t.id === id);
+                t.buffStack.stack.splice(index, 1);
+                return true;
+              }
               return false;
             },
-            shouldRemove: false,
+            get shouldRemove () {
+              return this.timer.round === 0;
+            },
             timer: {
               round: 3,
-              times: Infinity
-            }
-          }
-          t.buffStack.stack.push(buff)
+              times: Infinity,
+            },
+          };
+          t.buffStack.stack.push(buff);
         }
-      })
+      });
     },
   ];
-  withStrength:boolean=true;
-  withWeaken:boolean=false;
+  withStrength:boolean = true;
+  withWeaken:boolean = false;
 }

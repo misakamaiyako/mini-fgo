@@ -1,5 +1,5 @@
 import { ServantBase } from '@/base/servant';
-import { CardType } from '@/base/enums';
+import { ActionType, CardType } from '@/base/enums';
 
 /**
  * @description 指令卡类
@@ -94,14 +94,14 @@ export default class MoveCard {
   /**
    * @description 每一击伤害分布，基本总和为100，除天草extra和阿尔托莉雅（lancer）的蓝卡
    */
-  hitsChain:Array<number> ;
+  hitsChain:Array<number>;
   owner:ServantBase;
 
-  constructor (cardType:CardType,npRate:number,hitsChain:Array<number>,owner:ServantBase, fufuAttack:number=0, CommanderCardId?:number) {
+  constructor (cardType:CardType, npRate:number, hitsChain:Array<number>, owner:ServantBase, fufuAttack:number = 0, CommanderCardId?:number) {
     this.cardType = cardType;
     this.npRate = npRate;
     this.hitsChain = hitsChain;
-    this.owner = owner
+    this.owner = owner;
     this.fufuAttack = fufuAttack;
     if (CommanderCardId) {
       this.commanderCard = new CommanderCard(CommanderCardId, this);
@@ -109,10 +109,15 @@ export default class MoveCard {
   }
 
 }
+
 /**
  * @description 指令纹章
  */
 class CommanderCard {
   constructor (id:number, moveCard:MoveCard) {
+  }
+
+  handle (attack:{ actionType:ActionType.attack, [ args:string ]:any }) {
+
   }
 }

@@ -72,6 +72,7 @@ export function hiddenCharacteristicRestraint (
     beast: {
       beast: 1.1,
     },
+    star:{}
   };
   // @ts-ignore
   const restraint:number | undefined = matrix[ attacker ][ defender ];
@@ -165,7 +166,7 @@ export function calculationStarBonus (starInstance:StarBonus) {
 
 export function moveCardStarDropRate (
   cardType:CardType,
-  position:0 | 1 | 2 | 3,
+  position:number,
 ) {
   const matrix = {
     [ CardType.buster ]: [ 0.1, 0.15, 0.2, 0 ],

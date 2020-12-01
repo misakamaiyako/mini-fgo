@@ -3,6 +3,7 @@ import Noble from '@/base/noble';
 import EXcalibar from '@/instance/noble/excalibur';
 import growth from '@/servants/saber/AltriaPendragon/growth';
 import { CardType, Rare, ServantClass } from '@/base/enums';
+import { LeaderShipB } from '@/instance/skills/streathen';
 
 export default class AltriaPendragonSaber extends ServantBase {
   characteristic:Set<characteristic> = new Set([ 'ride', 'dragon', 'altriaFace', 'godAndLegend', 'arthur', 'king', 'human' ]);
@@ -10,9 +11,9 @@ export default class AltriaPendragonSaber extends ServantBase {
   id = 2;
   name = '阿尔托莉雅·潘德拉贡';
   npRate = 0.03;
-  positiveSkill:Array<Skill> = [];
+  positiveSkill:Array<SkillBase> = [];
   servantClass = ServantClass.saber;
-  skills:Array<Skill> = [];
+  skills:Array<SkillBase> = [];
   noble:Noble;
   rare = Rare.SSR;
   constructor (data: { fufu: { cards: number[]; atk: number; hp: number; }; commanderCardId: (number|undefined)[]; level: number; noble: { level: number; }; useDefault: boolean; status: { atk: number; hp: number; }; }) {
@@ -35,6 +36,7 @@ export default class AltriaPendragonSaber extends ServantBase {
       this.baseAttack = data.status.atk;
       this.baseHp = data.status.hp;
     }
+    this.skills.push(new LeaderShipB({leave:10,owner:this}))
   }
 
   starDropRate:number = 0.1;

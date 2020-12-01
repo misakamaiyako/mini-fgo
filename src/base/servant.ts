@@ -27,12 +27,12 @@ export abstract class ServantBase {
   /**
    * @description 主动技能组，可以为空
    */
-  abstract skills:Array<Skill>;
+  abstract skills:Array<SkillBase>;
 
   /**
    * @description 被动技能组
    */
-  abstract positiveSkill:Array<Skill>;
+  abstract positiveSkill:Array<SkillBase>;
   /**
    * @description 等级
    */
@@ -270,26 +270,6 @@ interface Cards {
   npRate:number,
   hitsChain:number[],
   commanderCardId:number | undefined
-}
-
-export abstract class SkillBase {
-  abstract name:string;
-  abstract coldDown:number;
-  owner:ServantBase;
-  leave:number = 10;
-  abstract valueArray:Array<number>;
-  successRateArray:Array<number> = new Array<number>(10).fill(1);
-  needChooseTarget:boolean = false;
-
-  active (currentEnemy:ServantBase, currentTarget?:ServantBase) {
-    if (this.needChooseTarget && !currentTarget) {
-      throw new ReferenceError('没有选择对象');
-    }
-  }
-
-  protected constructor (owner:ServantBase) {
-    this.owner = owner;
-  }
 }
 
 
