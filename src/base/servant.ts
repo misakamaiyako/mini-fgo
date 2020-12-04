@@ -122,6 +122,9 @@ export abstract class ServantBase {
    */
   abstract servantClass:ServantClass;
 
+  //敌人类型
+  type:1 | 2 = 1;
+
   /**
    * @description 即死率
    */
@@ -236,26 +239,28 @@ export abstract class ServantBase {
 
   }
 
-  getOpposite(){
-    if (this.scenes){
-      if (this.position==='player'){
-        return this.scenes.activeEnemy
+  getOpposite () {
+    if (this.scenes) {
+      if (this.position === 'player') {
+        return this.scenes.activeEnemy;
       } else {
-        return this.scenes.activeServant
+        return this.scenes.activeServant;
       }
     }
-    return []
+    return [];
   }
-  getTeammate(){
-    if (this.scenes){
-      if (this.position==='player'){
-        return this.scenes.activeServant
+
+  getTeammate () {
+    if (this.scenes) {
+      if (this.position === 'player') {
+        return this.scenes.activeServant;
       } else {
-        return this.scenes.activeEnemy
+        return this.scenes.activeEnemy;
       }
     }
-    return []
+    return [];
   }
+
   protected constructor (cards:Cards[], level:number) {
     this.moveCard = cards.map(t => {
       return new MoveCard(t.cardType, t.npRate, t.hitsChain, this, t.fufu, t.commanderCardId);

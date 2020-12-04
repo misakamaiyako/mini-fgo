@@ -1,5 +1,6 @@
 import { AttackerNp, DefenderNp, NobelAttack, NormalAttack, StarBonus } from '@/base/attack';
 import { CardType, ServantClass } from '@/base/enums';
+import { ServantBase } from '@/base/servant';
 
 export function classAttackPatch (servantClass:ServantClass):number {
   const matrix = {
@@ -228,4 +229,8 @@ export function targetNpBonus (targetClass:ServantClass) {
 //(ATK * 0.23 * 宝具伤害倍率 * 指令卡伤害倍率 * (1 ± 指令卡性能BUFF ∓ 指令卡耐性) * 职阶补正 * 职阶克制 * 隐藏属性克制 * (1 ± 攻击力BUFF ∓ 防御力BUFF - 特防状态BUFF) * (1 + 特攻状态加成 ± 宝具威力BUFF) * 宝具特攻倍率 * 随机数) ± 伤害附加与减免 ∓ 被伤害减免与提升
 export function calculationNobleDamage (attackInstance:NobelAttack, atk:number) {
   return (atk * 0.23 * attackInstance.nobleRate * attackInstance.moveCardRate * (1 + attackInstance.moveCardPerformance - attackInstance.moveCardEndurance) * attackInstance.rankSupplement * attackInstance.rankRestraint * attackInstance.hiddenStatus * (1 + attackInstance.attackPower - attackInstance.defencePower - attackInstance.specialDefend) * (1 + attackInstance.specialAttack + attackInstance.noblePower) * (attackInstance.nobleSpecialAttack || 1) * attackInstance.random) + attackInstance.damageAppend - attackInstance.defenceAppend;
+}
+
+export function performAttack(attacker:ServantBase,defender:ServantBase,damage:number,attackerNp:StarBonus,star:StarBonus,defenderNp:DefenderNp){
+
 }

@@ -8,7 +8,8 @@ import {
   hiddenCharacteristicRestraint,
   moveCardStarDropRate,
   restraint,
-  targetNpBonus, targetStarBonus,
+  targetNpBonus,
+  targetStarBonus,
 } from '@/base/formula';
 import MoveCard from '@/base/moveCard';
 
@@ -66,7 +67,7 @@ export interface AttackerNp {
   moveCardEndurance:number;
   //首位加成
   firstBonus:number;
-  //敌补正,类型2的敌人持有targetBonus上升20%的隐藏buff
+  //敌补正
   targetBonus:number;
   //NP获得量BUFF
   NpBonus:number;
@@ -121,11 +122,11 @@ export interface NobelAttack {
 }
 
 
-class Attack {
+export class Attack {
   attacker:ServantBase;
   attackInstance:{ firstBonus:number; busterChainBonus:number; attackPower:number; moveCardRate:number; criticPower:number; moveCardPerformance:number; actionType:ActionType; rankSupplement:number; moveCardHitRate:number; extraBonus:number; ignoresEvasion:boolean; specialAttack:any[]; card:MoveCard; damageAppend:number; pierce:boolean };
   attackerNpInstance:Omit<AttackerNp, 'isCritic' | 'overKillBonus' | 'targetBonus' | 'moveCardEndurance'>;
-  private starBonus:{ firstBonus:number; actionType:ActionType; servantStarDropRate:number; moveCardStarDropRate:any; starDropRateBuff:number };
+  private readonly starBonus:{ firstBonus:number; actionType:ActionType; servantStarDropRate:number; moveCardStarDropRate:any; starDropRateBuff:number };
 
   constructor (servant:ServantBase, card:MoveCard, cardPosition:number, firstCard:CardType, chainType:ChainType) {
     this.attacker = servant;
@@ -170,15 +171,15 @@ class Attack {
       npRate: servant.npType === 'process' ? servant.npRate : 0,
     };
     this.starBonus = servant.buffStack.handle({
-      actionType:ActionType.calculateStar,
+      actionType: ActionType.calculateStar,
       firstBonus: firstCard === CardType.quick ? 0.2 : 0,
       moveCardStarDropRate: moveCardStarDropRate(card.cardType, cardPosition),
       servantStarDropRate: servant.starDropRate,
       starDropRateBuff: 0,
-    })
+    });
   }
 
-  attack (target:ServantBase) {
+  attack (target:ServantBase, hasNextHit:boolean) {
     let defenceInstance = target.buffStack.handle({
       actionType: ActionType.defence,
       hiddenStatus: hiddenCharacteristicRestraint(this.attacker.hiddenCharacteristic, target.hiddenCharacteristic),
@@ -195,7 +196,7 @@ class Attack {
       card: this.attackInstance.card,
     });
     let attackInstance = this.attackInstance;
-    const isCritic:boolean = (attackInstance.card.criticRate - defenceInstance.criticRateDown) < Math.random();
+    const isCritic:boolean = (attackInstance.card.criticRate - defenceInstance.criticRateDown) > Math.random();
     let damageInstance:NormalAttack = {
       attackPower: attackInstance.attackPower,
       busterChainBonus: this.attackInstance.busterChainBonus,
@@ -228,21 +229,33 @@ class Attack {
     if (!(defenceInstance.evasion && (!attackInstance.ignoresEvasion && !attackInstance.pierce) || (defenceInstance.invincibility && !attackInstance.pierce) || defenceInstance.solemnDefence)) {
       damage = calculationNormalDamage(damageInstance, this.attacker.atk);
     }
-    let starInstance:StarBonus={
-      isCritic: isCritic?0.2:0,
+    let starInstance:StarBonus & { actionType:ActionType } = {
+      isCritic: isCritic ? 0.2 : 0,
       moveCardEndurance: damageInstance.moveCardEndurance,
       moveCardPerformance: damageInstance.moveCardPerformance,
       overKillBonus: 0,
       targetBonus: targetStarBonus(target.servantClass),
       targetStarDropRateBuff: 0,
-      ...this.starBonus
-    }
-    let npInstance:AttackerNp={
-      isCritic: isCritic?2:1,
+      ...this.starBonus,
+    };
+    let npInstance:AttackerNp & { actionType:ActionType } = {
+      actionType: ActionType.attackerBonusNp,
+      isCritic: isCritic ? 2 : 1,
       moveCardEndurance: defenceInstance.moveCardEndurance,
       overKillBonus: 0,
-      targetBonus: targetNpBonus(target.servantClass),
-      ...this.attackerNpInstance
-    }
+      targetBonus: targetNpBonus(target.servantClass) * (target.type === 2 ? 1.2 : 1),
+      ...this.attackerNpInstance,
+    };
+    let defenderNpInstance:DefenderNp & { actionType:ActionType } = {
+      actionType:ActionType.defenderBonusNp,
+      attackerNpBonus: targetNpBonus(this.attacker.servantClass) * (this.attacker.type === 2 ? 1.2 : 1),
+      defenceNpBonus: 0,
+      defenceNpRate: target.npType === 'process' ? target.npRate : 0,
+      npBuff: 0,
+      overKillBonus: 0,
+    };
+    target.buffStack.handle(starInstance);
+    target.buffStack.handle(defenderNpInstance);
+
   }
 }
