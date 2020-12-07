@@ -13,7 +13,7 @@ export default abstract class Noble extends MoveCard {
   readonly criticRate = 0;
   readonly commanderCard = undefined;
   overCharge:number = 0;
-
+  nobleSpecialAttack:Array<(target:ServantBase)=>number> =[]
   protected constructor (leave:number, owner:ServantBase, cardType:CardType, npRate:number, hitsChain:Array<number>) {
     super(cardType, npRate, hitsChain, owner);
     this.leave = leave;

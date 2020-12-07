@@ -73,7 +73,7 @@ export function hiddenCharacteristicRestraint (
     beast: {
       beast: 1.1,
     },
-    star:{}
+    star: {},
   };
   // @ts-ignore
   const restraint:number | undefined = matrix[ attacker ][ defender ];
@@ -221,7 +221,7 @@ export function targetNpBonus (targetClass:ServantClass) {
     [ ServantClass.beast2 ]: 1,
     [ ServantClass.beast3L ]: 1,
     [ ServantClass.beast3R ]: 1,
-    [ ServantClass.beastUnknown ]: 0,
+    [ ServantClass.beastUnknown ]: 1,
   };
   return matrix[ targetClass ] || 1;
 }
@@ -231,6 +231,25 @@ export function calculationNobleDamage (attackInstance:NobelAttack, atk:number) 
   return (atk * 0.23 * attackInstance.nobleRate * attackInstance.moveCardRate * (1 + attackInstance.moveCardPerformance - attackInstance.moveCardEndurance) * attackInstance.rankSupplement * attackInstance.rankRestraint * attackInstance.hiddenStatus * (1 + attackInstance.attackPower - attackInstance.defencePower - attackInstance.specialDefend) * (1 + attackInstance.specialAttack + attackInstance.noblePower) * (attackInstance.nobleSpecialAttack || 1) * attackInstance.random) + attackInstance.damageAppend - attackInstance.defenceAppend;
 }
 
-export function performAttack(attacker:ServantBase,defender:ServantBase,damage:number,attackerNp:StarBonus,star:StarBonus,defenderNp:DefenderNp){
-
+export function performanceAttack (attacker:ServantBase, defender:ServantBase, damage:number, attackerNp:AttackerNp, star:StarBonus, defenderNp:DefenderNp, hitChain:number[]) {
+  const total = (hitChain => {
+    let t:number = 0;
+    for (let i = 0; i < hitChain.length; i++) {
+      t += hitChain[ i ];
+    }
+    return t;
+  })(hitChain);
+  let stars:number = 0;
+  for (let i = 0; i < hitChain.length; i++) {
+    defender.hpAdd(-Math.round(damage / total * hitChain[ i ]), false);
+    const overKill = defender.hp <= 0;
+    attackerNp.overKillBonus = overKill ? 1.5 : 1;
+    defenderNp.overKillBonus = overKill ? 1.5 : 1;
+    star.overKillBonus = overKill ? 0.3 : 0;
+    attacker.addNp(calculationAttackerBonusNp(attackerNp));
+    defender.addNp(calculationDefenderBonusNp(defenderNp));
+    stars+=calculationStarBonus(star)
+  }
+  console.log(attacker.name + ' deal ' + damage + ' to ' + defender.name);
+  return stars
 }

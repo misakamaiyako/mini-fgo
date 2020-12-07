@@ -79,7 +79,7 @@ export default class MoveCard {
     this.hitsChain.forEach(t => {
       total += t;
     });
-    return total;
+    return total/100;
   }
 
   /**
@@ -117,7 +117,7 @@ class CommanderCard {
   constructor (id:number, moveCard:MoveCard) {
   }
 
-  handle (attack:{ actionType:ActionType.attack, [ args:string ]:any }) {
+  active () {
 
   }
 }

@@ -7,11 +7,13 @@ import {
   classAttackPatch,
   hiddenCharacteristicRestraint,
   moveCardStarDropRate,
+  performanceAttack,
   restraint,
   targetNpBonus,
   targetStarBonus,
 } from '@/base/formula';
 import MoveCard from '@/base/moveCard';
+import Noble from '@/base/noble';
 
 export interface NormalAttack {
   //指令卡伤害倍率
@@ -127,9 +129,13 @@ export class Attack {
   attackInstance:{ firstBonus:number; busterChainBonus:number; attackPower:number; moveCardRate:number; criticPower:number; moveCardPerformance:number; actionType:ActionType; rankSupplement:number; moveCardHitRate:number; extraBonus:number; ignoresEvasion:boolean; specialAttack:any[]; card:MoveCard; damageAppend:number; pierce:boolean };
   attackerNpInstance:Omit<AttackerNp, 'isCritic' | 'overKillBonus' | 'targetBonus' | 'moveCardEndurance'>;
   private readonly starBonus:{ firstBonus:number; actionType:ActionType; servantStarDropRate:number; moveCardStarDropRate:any; starDropRateBuff:number };
+  hitChain:Array<number>;
 
   constructor (servant:ServantBase, card:MoveCard, cardPosition:number, firstCard:CardType, chainType:ChainType) {
     this.attacker = servant;
+    if (card.commanderCard) {
+      card.commanderCard.active();
+    }
     const attack = servant.buffStack.handle({
       actionType: ActionType.attack,
       attackPower: 0,
@@ -150,9 +156,6 @@ export class Attack {
       busterChainBonus: chainType === ChainType.buster ? this.attacker.atk * 0.2 : 0,
       firstBonus: firstCard === CardType.buster ? 0.5 : 0,
     });
-    if (card.commanderCard) {
-      card.commanderCard.handle(attack);
-    }
     attack.attackPower = Math.max(-100, Math.min(500, attack.attackPower));
     attack.moveCardPerformance = Math.max(-100, Math.min(500, attack.moveCardPerformance));
     attack.criticPower = Math.max(-100, Math.min(500, attack.criticPower));
@@ -177,9 +180,10 @@ export class Attack {
       servantStarDropRate: servant.starDropRate,
       starDropRateBuff: 0,
     });
+    this.hitChain = card.hitsChain;
   }
 
-  attack (target:ServantBase, hasNextHit:boolean) {
+  attack (target:ServantBase, hitFinish:boolean) {
     let defenceInstance = target.buffStack.handle({
       actionType: ActionType.defence,
       hiddenStatus: hiddenCharacteristicRestraint(this.attacker.hiddenCharacteristic, target.hiddenCharacteristic),
@@ -247,7 +251,7 @@ export class Attack {
       ...this.attackerNpInstance,
     };
     let defenderNpInstance:DefenderNp & { actionType:ActionType } = {
-      actionType:ActionType.defenderBonusNp,
+      actionType: ActionType.defenderBonusNp,
       attackerNpBonus: targetNpBonus(this.attacker.servantClass) * (this.attacker.type === 2 ? 1.2 : 1),
       defenceNpBonus: 0,
       defenceNpRate: target.npType === 'process' ? target.npRate : 0,
@@ -256,6 +260,59 @@ export class Attack {
     };
     target.buffStack.handle(starInstance);
     target.buffStack.handle(defenderNpInstance);
+    const stars = performanceAttack(this.attacker, target, damage, npInstance, starInstance, defenderNpInstance, this.hitChain);
+    target.hpAdd(0, hitFinish);
+    return stars;
+  }
+}
 
+export class NobelAttack {
+  private nobleInstance;
+  private attackerNpInstance:{ firstBonus:number; npRate:number; moveCaredBonus:number; NpBonus:number; moveCardPerformance:number };
+  private starBonus:{ firstBonus:number; actionType:ActionType; servantStarDropRate:number; moveCardStarDropRate:any; starDropRateBuff:number };
+  private hitChain:Array<number>;
+
+  constructor (servant:ServantBase, card:Noble, nobleRate:number) {
+    const attack = servant.buffStack.handle({
+      actionType: ActionType.noble,
+      attackPower: 0,
+      damageAppend: 0,
+      defenceAppend: 0,
+      defencePower: 0,
+      moveCardPerformance: 0,
+      moveCardRate: card.basePowerRate,
+      noblePower: 0,
+      nobleRate: nobleRate,
+      rankSupplement: classAttackPatch(servant.servantClass),
+      nobleSpecialAttack: card.nobleSpecialAttack,
+      specialAttack: [],
+      ignoresEvasion: false,
+      pierce: false,
+    });
+    attack.attackPower = Math.max(-100, Math.min(500, attack.attackPower));
+    attack.moveCardPerformance = Math.max(-100, Math.min(500, attack.moveCardPerformance));
+    this.attackerNpInstance = {
+      NpBonus: 0,
+      firstBonus: 0,
+      moveCardPerformance: attack.moveCardPerformance,
+      moveCaredBonus:
+        card.cardType === CardType.buster
+          ? 0
+          : (card.cardType === CardType.art ? 3 : 1) *
+          (1.5),
+      npRate: servant.npType === 'process' ? servant.npRate : 0,
+    };
+    this.starBonus = servant.buffStack.handle({
+      actionType: ActionType.calculateStar,
+      firstBonus: 0,
+      moveCardStarDropRate: moveCardStarDropRate(card.cardType, 0),
+      servantStarDropRate: servant.starDropRate,
+      starDropRateBuff: 0,
+    });
+    this.hitChain = card.hitsChain;
+    this.nobleInstance = attack;
+  }
+
+  attack (target:ServantBase) {
   }
 }
