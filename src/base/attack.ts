@@ -3,6 +3,7 @@
 import { ActionType, CardType, ChainType } from '@/base/enums';
 import { ServantBase } from '@/base/servant';
 import {
+  calculationNobleDamage,
   calculationNormalDamage,
   classAttackPatch,
   hiddenCharacteristicRestraint,
@@ -266,11 +267,12 @@ export class Attack {
   }
 }
 
-export class NobelAttack {
-  private nobleInstance;
-  private attackerNpInstance:{ firstBonus:number; npRate:number; moveCaredBonus:number; NpBonus:number; moveCardPerformance:number };
+export class NobelActive {
+  private readonly nobleInstance;
+  private attackerNpInstance:{ firstBonus:number; npRate:number; moveCaredBonus:number; NpBonus:number; moveCardPerformance:number; };
   private starBonus:{ firstBonus:number; actionType:ActionType; servantStarDropRate:number; moveCardStarDropRate:any; starDropRateBuff:number };
   private hitChain:Array<number>;
+  private attacker:ServantBase;
 
   constructor (servant:ServantBase, card:Noble, nobleRate:number) {
     const attack = servant.buffStack.handle({
@@ -288,6 +290,7 @@ export class NobelAttack {
       specialAttack: [],
       ignoresEvasion: false,
       pierce: false,
+      card
     });
     attack.attackPower = Math.max(-100, Math.min(500, attack.attackPower));
     attack.moveCardPerformance = Math.max(-100, Math.min(500, attack.moveCardPerformance));
@@ -311,8 +314,57 @@ export class NobelAttack {
     });
     this.hitChain = card.hitsChain;
     this.nobleInstance = attack;
+    this.attacker = servant
   }
 
   attack (target:ServantBase) {
+    let defenceInstance = target.buffStack.handle({
+      actionType:ActionType.beNoble,
+      hiddenStatus: hiddenCharacteristicRestraint(this.attacker.hiddenCharacteristic, target.hiddenCharacteristic),
+      rankRestraint: restraint(this.attacker.servantClass, target.servantClass),
+      moveCardEndurance: 0,
+      specialDefend: 0,
+      defencePower: 0,
+      defenceAppend: 0,
+      evasion: false,//回避
+      invincibility: false,//无敌
+      solemnDefence: false,//对肃正防御
+      criticRateDown: 0,
+      attacker: this.attacker,
+      card: this.nobleInstance.card,
+    })
+    let nobleInstance = this.nobleInstance
+    let damageInstance:NobelAttack = {
+      attackPower: nobleInstance.attackPower,
+      damageAppend: nobleInstance.damageAppend,
+      defenceAppend: defenceInstance.defenceAppend,
+      defencePower: defenceInstance.defencePower,
+      hiddenStatus: hiddenCharacteristicRestraint(this.attacker.hiddenCharacteristic,target.hiddenCharacteristic),
+      moveCardEndurance: defenceInstance.moveCardEndurance,
+      moveCardPerformance: nobleInstance.moveCardPerformance,
+      moveCardRate: this.nobleInstance.moveCardRate,
+      noblePower: nobleInstance.noblePower,
+      nobleRate: nobleInstance.nobleRate,
+      nobleSpecialAttack: (fun => {
+        let rate:number = 0;
+        for (let funKey in fun) {
+          rate += fun[ funKey ](target);
+        }
+        return rate;
+      })(nobleInstance.nobleSpecialAttack),
+      random: 0.9 + Math.random() * 0.2,
+      rankRestraint: defenceInstance.rankRestraint,
+      rankSupplement: nobleInstance.rankSupplement,
+      specialAttack:  (fun => {
+        let rate:number = 0;
+        for (let funKey in fun) {
+          // @ts-ignore
+          rate += fun[ funKey ](target);
+        }
+        return rate;
+      })(nobleInstance.specialAttack),
+      specialDefend: defenceInstance.specialDefend
+    }
+    const damage = calculationNobleDamage(damageInstance,this.attacker.atk)
   }
 }
