@@ -49,4 +49,16 @@ declare global {
     activeRate:number; //buff有效的几率，大部分为情况1
     handle:(value:{ actionType:ActionType; [ args:string ]:any }) => boolean; //对象处理，必须在开始前判断类型,返回值表示是否对操作生效了
   }
+  interface DefenceInstance{
+    hiddenStatus:number,
+    rankRestraintFun: Array<number>,
+    moveCardEndurance: number,
+    specialDefend: number,
+    defencePower: number,
+    defenceAppend: number,
+    evasion: boolean,//回避
+    invincibility: boolean,//无敌
+    solemnDefence: boolean,//对肃正防御
+    criticRateDown: number
+  }
 }

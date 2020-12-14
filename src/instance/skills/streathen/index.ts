@@ -1,6 +1,6 @@
 import { SkillBase } from '@/base/SkillBase';
 import { ActionType, BuffEffect, BuffType, StrengthenType } from '@/base/enums';
-import { NobelAttack, NormalAttack } from '@/base/attack';
+import { NobleAttack, NormalAttack } from '@/base/attack';
 
 export class LeaderShipB extends SkillBase {
   description:string = '攻击力提升';
@@ -29,7 +29,7 @@ export class LeaderShipB extends SkillBase {
                 return true;
               }
               if (value.actionType === ActionType.noble) {
-                (value.attackInstance as NobelAttack).attackPower += powerUp;
+                (value.attackInstance as NobleAttack).attackPower += powerUp;
                 return true;
               }
               return false;

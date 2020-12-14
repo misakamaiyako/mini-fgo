@@ -1,7 +1,7 @@
 import Noble from '@/base/noble';
 import MoveCard from '@/base/moveCard';
 import { ServantBase } from '@/base/servant';
-import { AttackerNp, DefenderNp, NobelAttack, NormalAttack, StarBonus } from '@/base/attack';
+import { AttackerNp, DefenderNp, NobleAttack, NormalAttack, StarBonus } from '@/base/attack';
 import {
   calculationAttackerBonusNp,
   calculationNobleDamage,
@@ -269,7 +269,7 @@ export function NobleAttack (nobleCard:Noble, nobleRate:number, attacker:Servant
   const defenderCount = defender.length;
   defender.forEach((t, index) => {
     if (t) {
-      let atkInstance:NobelAttack = {
+      let atkInstance:NobleAttack = {
         ...nobleInstance,
         hiddenStatus: hiddenCharacteristicRestraint(
           attacker.hiddenCharacteristic,

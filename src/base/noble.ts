@@ -13,13 +13,15 @@ export default abstract class Noble extends MoveCard {
   readonly criticRate = 0;
   readonly commanderCard = undefined;
   overCharge:number = 0;
-  nobleSpecialAttack:Array<(target:ServantBase)=>number> =[]
+  nobleSpecialAttack:Array<(target:ServantBase) => number> = [];
+
   protected constructor (leave:number, owner:ServantBase, cardType:CardType, npRate:number, hitsChain:Array<number>) {
     super(cardType, npRate, hitsChain, owner);
     this.leave = leave;
   }
 
   active (overCharge:number) {
+    this.overCharge = 0;
     this.owner.buffStack.handle({ actionType: ActionType.overCharge, noble: this });
     this.overCharge = Math.min(overCharge + this.overCharge + (this.owner.npType === 'process' ? (this.owner.np / 100) | 0 : 1), 5);
     this.owner.np = 0;
